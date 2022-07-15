@@ -62,6 +62,11 @@ namespace RandomEncounters.Utils
             return _npcs;
         }
 
+        internal static List<UserModel> GetOnlineadmins(World world)
+        {
+            return GetOnlineUsers(world).Where(u => u.IsAdmin).ToList();
+        }
+
 
         internal static UserModel GetUserByPlatformId(World world, ulong platformId)
         {
@@ -92,7 +97,7 @@ namespace RandomEncounters.Utils
             {
                 var user = world.EntityManager.GetComponentData<User>(userEntity);
                 var userModel = UserModel.FromUser(world, user, userEntity);
-                if (userModel.IsConnected)
+                if (userModel is { IsConnected: true })
                 {
                     result.Add(userModel);
                 }

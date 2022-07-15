@@ -1,4 +1,5 @@
-﻿using ProjectM;
+﻿using System;
+using ProjectM;
 using ProjectM.Network;
 using Unity.Entities;
 using Unity.Transforms;
@@ -27,9 +28,15 @@ public class UserModel
         model.FromCharacter = new FromCharacter { User = model.Entity, Character = model.LocalCharacter._Entity };
 
         var charEntity = model.FromCharacter.Character;
-
-        var equipment = world.EntityManager.GetComponentData<Equipment>(charEntity);
-        model.Level = equipment.ArmorLevel.Value + equipment.WeaponLevel.Value + equipment.SpellLevel.Value;
+        try
+        {
+            var equipment = world.EntityManager.GetComponentData<Equipment>(charEntity);
+            model.Level = equipment.ArmorLevel.Value + equipment.WeaponLevel.Value + equipment.SpellLevel.Value;
+        }
+        catch 
+        {
+            return null;
+        }
         return model;
     }
 

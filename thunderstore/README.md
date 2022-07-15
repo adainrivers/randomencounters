@@ -12,6 +12,10 @@ Random Encounters mod requires Wetstone plugin installed. The latest version of 
 
 If you are not planning to use the hot reload feature of Wetstone, simply place the plugin dll into `BepInEx\plugins` folder and run the server. Otherwise, please check [Wetstone documentation](https://molenzwiebel.github.io/Wetstone/features/reload.html) about how to place the mod to the correct folder.
 
+## Manually triggering encounters
+
+`!randomencounter` chat command can be used by admins to trigger a Random Encounter, even when the `Enabled` setting is false.
+
 ## Configuration files and options:
 
 ### Main.cfg
@@ -31,6 +35,8 @@ The upper value for the NPC level - Player level difference.
 System message template for the encounter.
 - **RewardMessageTemplate:** 
 System message template for the reward.
+- **NotifyAdminsAboutEncountersAndRewards:**
+Notifies all online admins about all the player encounters and rewards.
 
 ### Items.cfg
 

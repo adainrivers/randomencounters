@@ -19,7 +19,7 @@ namespace RandomEncounters
     {
         public const string PluginGuid = "gamingtools.RandomEncounters";
         public const string PluginName = "RandomEncounters";
-        public const string PluginVersion = "0.5.2";
+        public const string PluginVersion = "0.5.3";
 
         internal static ManualLogSource Logger { get; private set; }
 

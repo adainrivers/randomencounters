@@ -8,6 +8,7 @@ EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Thunderstore", "Thunderstore", "{FC3F5838-DB55-4B91-9D27-E18F160E0808}"
 	ProjectSection(SolutionItems) = preProject
 		..\thunderstore\manifest.json = ..\thunderstore\manifest.json
+		..\thunderstore\README.md = ..\thunderstore\README.md
 	EndProjectSection
 	ProjectSection(FolderGlobals) = preProject
 		D_5_4VRising_4Development_4RandomEncounters_4thunderstore_4manifest_1json__JsonSchema = 

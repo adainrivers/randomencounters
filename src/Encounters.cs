@@ -51,6 +51,16 @@ namespace RandomEncounters
                     var message = string.Format(PluginConfig.RewardMessageTemplate.Value, itemModel.Color, itemModel.Name);
                     ServerChatUtils.SendSystemMessageToClient(sender.EntityManager, user, message);
                     bounties.TryRemove(deathEvent.Died.Index, out _);
+                    Logger.LogInfo($"{userModel.CharacterName} earned reward: {itemModel.Name}");
+                    if (PluginConfig.NotifyAdminsAboutEncountersAndRewards.Value)
+                    {
+                        var onlineAdmins = DataFactory.GetOnlineadmins(sender.World);
+                        foreach (var onlineAdmin in onlineAdmins)
+                        {
+                            ServerChatUtils.SendSystemMessageToClient(sender.World.EntityManager, onlineAdmin.User, $"{user.CharacterName} earned an encounter reward: <color={itemModel.Color}>{itemModel.Name}</color>");
+                        }
+                    }
+
                 }
             }
         }
@@ -114,7 +124,7 @@ namespace RandomEncounters
                 var userPos = user.LocalToWorld.Position;
                 var npcPos = localToWorld.Position;
 
-                if (Math.Abs(userPos.x - npcPos.x) < 20 && Math.Abs(userPos.z - npcPos.z) < 20)
+                if (Math.Abs(userPos.x - npcPos.x) < 50 && Math.Abs(userPos.z - npcPos.z) < 50)
                 {
                     Logger.LogInfo(
                         $"Found the entity {possibleEntity.Index},{possibleEntity.Version} at {localToWorld.Position.x} {localToWorld.Position.z}");
@@ -135,7 +145,19 @@ namespace RandomEncounters
                         MessageTemplate,
                         npc.Name, Lifetime);
 
+                //world.EntityManager.SetComponentData(foundEntity, new UnitLevel { Level = (int)user.Level });
+
                 ServerChatUtils.SendSystemMessageToClient(world.EntityManager, user.User, message);
+                Logger.LogInfo($"Encounters started: {user.CharacterName} vs. {npc.Name}");
+
+                if (PluginConfig.NotifyAdminsAboutEncountersAndRewards.Value)
+                {
+                    var onlineAdmins = DataFactory.GetOnlineadmins(world);
+                    foreach (var onlineAdmin in onlineAdmins)
+                    {
+                        ServerChatUtils.SendSystemMessageToClient(world.EntityManager, onlineAdmin.User, $"Encounter started: {user.CharacterName} vs. {npc.Name}");
+                    }
+                }
                 RewardsMap[user.PlatformId][foundEntity.Index] = DataFactory.GetRandomItem();
             }
             else

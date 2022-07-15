@@ -22,6 +22,7 @@ namespace RandomEncounters.Configuration
         public static ConfigEntry<int> EncounterMaxLevelDifferenceUpper { get; private set; }
         public static ConfigEntry<string> EncounterMessageTemplate { get; private set; }
         public static ConfigEntry<string> RewardMessageTemplate { get; private set; }
+        public static ConfigEntry<bool> NotifyAdminsAboutEncountersAndRewards { get; private set; }
 
         public static Dictionary<int, ConfigEntry<bool>> Npcs = new();
         public static Dictionary<int, ConfigEntry<bool>> Items = new();
@@ -48,6 +49,7 @@ namespace RandomEncounters.Configuration
             EncounterMaxLevelDifferenceUpper = _mainConfig.Bind("Main", "EncounterMaxLevelDifference", 0, "The upper value for the NPC level - Player level difference.");
             EncounterMessageTemplate = _mainConfig.Bind("Main", "EncounterMessageTemplate", "You have encountered a <color=#daa520>{0}</color>. You have <color=#daa520>{1}</color> seconds to kill it for a chance of a random reward.", "System message template for the encounter.");
             RewardMessageTemplate = _mainConfig.Bind("Main", "RewardMessageTemplate", "Congratulations. Your reward: <color={0}>{1}</color>.", "System message template for the reward.");
+            NotifyAdminsAboutEncountersAndRewards = _mainConfig.Bind("Main", "NotifyAdminsAboutEncountersAndRewards", true, "If enabled, all online admins are notified about encounters and rewards.");
             foreach (var npcModel in DataFactory.GetAllNpcs().OrderBy(i => i.Name))
             {
                 Npcs[npcModel.Id] = _npcsConfig.Bind("NPCs", npcModel.PrefabName, true,

@@ -1,6 +1,6 @@
 {
   "name": "RandomEncounters",
-  "version_number": "0.5.2",
+  "version_number": "0.5.3",
   "website_url": "https://github.com/adainrivers/randomencounters",
   "description": "This server side mod spawns a random NPC near a random online player at random intervals, and the player wins a random item reward if the NPC is killed within the given time limit.",
   "dependencies": [
