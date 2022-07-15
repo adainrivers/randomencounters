@@ -41,8 +41,8 @@ namespace RandomEncounters.Configuration
             _itemsConfig = File.Exists(itemsConfigFilePath) ? new ConfigFile(itemsConfigFilePath, false) : new ConfigFile(itemsConfigFilePath, true);
 
             Enabled = _mainConfig.Bind("Main", "Enabled", true, "Determines whether the random encounters are enabled or not.");
-            EncounterTimerMin = _mainConfig.Bind("Main", "EncounterTimerMin", 120, "Minimum seconds before a new encounter is initiated.");
-            EncounterTimerMax = _mainConfig.Bind("Main", "EncounterTimerMax", 240, "Maximum seconds before a new encounter is initiated.");
+            EncounterTimerMin = _mainConfig.Bind("Main", "EncounterTimerMin", 1200, "Minimum seconds before a new encounter is initiated. This value is divided by the online users count.");
+            EncounterTimerMax = _mainConfig.Bind("Main", "EncounterTimerMax", 2400, "Maximum seconds before a new encounter is initiated. This value is divided by the online users count.");
             EncounterLength = _mainConfig.Bind("Main", "EncounterLength", 120, "Maximum seconds until the player can kill the NPC for a reward.");
             EncounterMaxLevelDifferenceLower = _mainConfig.Bind("Main", "EncounterMinLevelDifference", 99, "The lower value for the NPC level - Player level difference.");
             EncounterMaxLevelDifferenceUpper = _mainConfig.Bind("Main", "EncounterMaxLevelDifference", 0, "The upper value for the NPC level - Player level difference.");

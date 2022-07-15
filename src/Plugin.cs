@@ -7,6 +7,8 @@ using RandomEncounters.Components;
 using RandomEncounters.Configuration;
 using RandomEncounters.Patch;
 using RandomEncounters.Utils;
+using Wetstone.API;
+using Wetstone.Hooks;
 
 namespace RandomEncounters
 {
@@ -17,7 +19,7 @@ namespace RandomEncounters
     {
         public const string PluginGuid = "gamingtools.RandomEncounters";
         public const string PluginName = "RandomEncounters";
-        public const string PluginVersion = "0.5.0";
+        public const string PluginVersion = "0.5.2";
 
         internal static ManualLogSource Logger { get; private set; }
 
@@ -45,22 +47,42 @@ namespace RandomEncounters
             if (PluginConfig.Enabled.Value)
             {
                 _encounterTimer.Start(
-                    (world) =>
+                    world =>
                     {
                         Logger.LogInfo("Starting an encounter.");
                         Encounters.StartEncounter(world);
                     }, 
-                    () =>
+                    input =>
                     {
+                        if (input is not int onlineUsersCount)
+                        {
+                            Logger.LogError("Encounter timer delay function parameter is not a valid integer");
+                            return TimeSpan.MaxValue;
+                        }
+                        if (onlineUsersCount < 1)
+                        {
+                            onlineUsersCount = 1;
+                        }
                         var seconds =  new Random().Next(PluginConfig.EncounterTimerMin.Value, PluginConfig.EncounterTimerMax.Value);
                         Logger.LogInfo($"Next encounter will start in {seconds} seconds.");
-                        return TimeSpan.FromSeconds(seconds);
+                        return TimeSpan.FromSeconds(seconds) / onlineUsersCount;
                     });
+            }
+
+            Chat.OnChatMessage += Chat_OnChatMessage;
+        }
+
+        private void Chat_OnChatMessage(VChatEvent e)
+        {
+            if (e.Message.Equals("!randomencounter", StringComparison.OrdinalIgnoreCase) && e.User.IsAdmin)
+            {
+                Encounters.StartEncounter(VWorld.Server);
             }
         }
 
         public override bool Unload()
         {
+            Chat.OnChatMessage-= Chat_OnChatMessage;
             Config.Clear();
             _encounterTimer.Stop();
             TaskRunner.Destroy();

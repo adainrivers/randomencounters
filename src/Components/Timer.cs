@@ -1,5 +1,6 @@
 ﻿using System;
 using RandomEncounters.Patch;
+using RandomEncounters.Utils;
 using Unity.Entities;
 
 namespace RandomEncounters.Components
@@ -11,7 +12,7 @@ namespace RandomEncounters.Components
         private DateTime _lastRunTime;
         private TimeSpan _delay;
         private Action<World> _action;
-        private Func<TimeSpan> _delayAction;
+        private Func<object,TimeSpan> _delayAction;
 
         public void Start(Action<World> action, TimeSpan delay)
         {
@@ -22,10 +23,10 @@ namespace RandomEncounters.Components
             ServerEvents.OnUpdate += Update;
         }
 
-        public void Start(Action<World> action, Func<TimeSpan> delayAction)
+        public void Start(Action<World> action, Func<object, TimeSpan> delayAction)
         {
             _delayAction = delayAction;
-            _delay = _delayAction.Invoke();
+            _delay = _delayAction.Invoke(1);
             _lastRunTime = DateTime.UtcNow;
             _action = action;
             _enabled = true;
@@ -47,18 +48,19 @@ namespace RandomEncounters.Components
             _isRunning = true;
             try
             {
-                Utils.Logger.LogDebug("Executing timer.");
+                Logger.LogDebug("Executing timer.");
                 _action.Invoke(world);
             }
             catch (Exception ex)
             {
-                Utils.Logger.LogError(ex);
+                Logger.LogError(ex);
             }
             finally
             {
+                var onlineUsersCount = DataFactory.GetOnlineUsersCount(world);
                 if (_delayAction != null)
                 {
-                    _delay = _delayAction.Invoke();
+                    _delay = _delayAction.Invoke(onlineUsersCount);
                 }
                 _lastRunTime = DateTime.UtcNow;
                 _isRunning = false;

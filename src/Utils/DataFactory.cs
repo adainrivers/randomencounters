@@ -47,6 +47,11 @@ namespace RandomEncounters.Utils
             return users.GetRandomItem();
         }
 
+        internal static int GetOnlineUsersCount(World world)
+        {
+            return GetOnlineUsers(world).Count;
+        }
+
         internal static List<ItemModel> GetAllItems()
         {
             return _items;
