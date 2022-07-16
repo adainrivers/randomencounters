@@ -6,37 +6,94 @@ This server side mod spawns a random NPC near a random online player at random i
 
 It can be configured using the configuration files which are created on first run.
 
+## Source Code
+
+Source code of this mod can be found at:
+https://github.com/adainrivers/randomencounters
+
 ## Installation
 
 Random Encounters mod requires Wetstone plugin installed. The latest version of Wetstone can be downloaded from https://v-rising.thunderstore.io/package/molenzwiebel/Wetstone/
 
 If you are not planning to use the hot reload feature of Wetstone, simply place the plugin dll into `BepInEx\plugins` folder and run the server. Otherwise, please check [Wetstone documentation](https://molenzwiebel.github.io/Wetstone/features/reload.html) about how to place the mod to the correct folder.
 
-## Manually triggering encounters
+## Chat Commands
 
-`!randomencounter` chat command can be used by admins to trigger a Random Encounter, even when the `Enabled` setting is false.
+All chat commands use the default prefix of `!randomencounter` or `!re`. They are only accessible by server admins.
+
+### Commands
+
+`!re start` or just `!re`: Starts an encounter for a random online user.
+`!re me`: Starts an encounter for the admin who sends the command.
+`!re reload`: Reloads the configuration without restarting the mod.
+`!re {playerName}`: Starts an encounter for the given player, for example `!re Adain`
 
 ## Configuration files and options:
 
 ### Main.cfg
-- **Enabled:** 
-Determines whether the random encounters are enabled or not.
-- **EncounterTimerMin:** 
-Minimum seconds before a new encounter is initiated. This value is divided by the online users count.
-- **EncounterTimerMax:** 
-Maximum seconds before a new encounter is initiated. This value is divided by the online users count.
-- **EncounterLength:** 
-Maximum seconds until the player can kill the NPC for a reward.
-- **EncounterMinLevelDifference:** 
-The lower value for the NPC level - Player level difference.
-- **EncounterMaxLevelDifference:** 
-The upper value for the NPC level - Player level difference.
-- **EncounterMessageTemplate:** 
-System message template for the encounter.
-- **RewardMessageTemplate:** 
-System message template for the reward.
-- **NotifyAdminsAboutEncountersAndRewards:**
-Notifies all online admins about all the player encounters and rewards.
+```
+[Main]
+
+## Determines whether the random encounters are enabled or not.
+# Setting type: Boolean
+# Default value: true
+Enabled = true
+
+## When enabled, players who are in a castle are excluded from encounters
+# Setting type: Boolean
+# Default value: true
+SkipPlayersInCastle = true
+
+## Minimum seconds before a new encounter is initiated. This value is divided by the online users count.
+# Setting type: Int32
+# Default value: 1200
+EncounterTimerMin = 1200
+
+## Maximum seconds before a new encounter is initiated. This value is divided by the online users count.
+# Setting type: Int32
+# Default value: 2400
+EncounterTimerMax = 2400
+
+## Maximum seconds until the player can kill the NPC for a reward.
+# Setting type: Int32
+# Default value: 120
+EncounterLength = 120
+
+## The lower value for the NPC level - Player level difference. For example, if player level is 50, and this setting is 20, then the lowest level of the spawned NPC would be 30.
+# Setting type: Int32
+# Default value: 99
+EncounterMaxLevelDifferenceLower = 99
+
+## The upper value for the NPC level - Player level difference.  For example, if player level is 50, and this setting is 20, then the highest level of the spawned NPC would be 70.
+# Setting type: Int32
+# Default value: 0
+EncounterMaxLevelDifferenceUpper = 0
+
+## System message template for the encounter.
+# Setting type: String
+# Default value: You have encountered a <color=#daa520>{0}</color>. You have <color=#daa520>{1}</color> seconds to kill it for a chance of a random reward.
+EncounterMessageTemplate = You have encountered a <color=#daa520>{0}</color>. You have <color=#daa520>{1}</color> seconds to kill it for a chance of a random reward.
+
+## System message template for the reward.
+# Setting type: String
+# Default value: Congratulations. Your reward: <color={0}>{1}</color>.
+RewardMessageTemplate = Congratulations. Your reward: <color={0}>{1}</color>.
+
+## System message template for the reward announcement.
+# Setting type: String
+# Default value: {0} earned an encounter reward: <color={1}>{2}</color>.
+RewardAnnouncementMessageTemplate = {0} earned an encounter reward: <color={1}>{2}</color>.
+
+## If enabled, all online admins are notified about encounters and rewards.
+# Setting type: Boolean
+# Default value: true
+NotifyAdminsAboutEncountersAndRewards = true
+
+## If enabled, all online players are notified about any player's rewards.
+# Setting type: Boolean
+# Default value: false
+NotifyAllPlayersAboutRewards = false
+```
 
 ### Items.cfg
 

@@ -1,10 +1,12 @@
 ﻿using System;
+using System.Linq;
 using BepInEx;
 using BepInEx.IL2CPP;
 using BepInEx.Logging;
 using HarmonyLib;
 using RandomEncounters.Components;
 using RandomEncounters.Configuration;
+using RandomEncounters.Models;
 using RandomEncounters.Patch;
 using RandomEncounters.Utils;
 using Wetstone.API;
@@ -14,12 +16,12 @@ namespace RandomEncounters
 {
     [BepInPlugin(PluginGuid, PluginName, PluginVersion)]
     [BepInDependency("xyz.molenzwiebel.wetstone")]
-    [Wetstone.API.Reloadable]
+    [Reloadable]
     public class Plugin : BasePlugin
     {
         public const string PluginGuid = "gamingtools.RandomEncounters";
         public const string PluginName = "RandomEncounters";
-        public const string PluginVersion = "0.5.3";
+        public const string PluginVersion = "0.6.0";
 
         internal static ManualLogSource Logger { get; private set; }
 
@@ -46,37 +48,94 @@ namespace RandomEncounters
             _encounterTimer = new Timer();
             if (PluginConfig.Enabled.Value)
             {
-                _encounterTimer.Start(
-                    world =>
-                    {
-                        Logger.LogInfo("Starting an encounter.");
-                        Encounters.StartEncounter(world);
-                    }, 
-                    input =>
-                    {
-                        if (input is not int onlineUsersCount)
-                        {
-                            Logger.LogError("Encounter timer delay function parameter is not a valid integer");
-                            return TimeSpan.MaxValue;
-                        }
-                        if (onlineUsersCount < 1)
-                        {
-                            onlineUsersCount = 1;
-                        }
-                        var seconds =  new Random().Next(PluginConfig.EncounterTimerMin.Value, PluginConfig.EncounterTimerMax.Value);
-                        Logger.LogInfo($"Next encounter will start in {seconds} seconds.");
-                        return TimeSpan.FromSeconds(seconds) / onlineUsersCount;
-                    });
+                StartEncounterTimer();
             }
 
             Chat.OnChatMessage += Chat_OnChatMessage;
         }
 
+        private static void StartEncounterTimer()
+        {
+            _encounterTimer.Start(
+                world =>
+                {
+                    Logger.LogInfo("Starting an encounter.");
+                    Encounters.StartEncounter(world);
+                },
+                input =>
+                {
+                    if (input is not int onlineUsersCount)
+                    {
+                        Logger.LogError("Encounter timer delay function parameter is not a valid integer");
+                        return TimeSpan.MaxValue;
+                    }
+                    if (onlineUsersCount < 1)
+                    {
+                        onlineUsersCount = 1;
+                    }
+                    var seconds = new Random().Next(PluginConfig.EncounterTimerMin.Value, PluginConfig.EncounterTimerMax.Value);
+                    Logger.LogInfo($"Next encounter will start in {seconds} seconds.");
+                    return TimeSpan.FromSeconds(seconds) / onlineUsersCount;
+                });
+        }
+
         private void Chat_OnChatMessage(VChatEvent e)
         {
-            if (e.Message.Equals("!randomencounter", StringComparison.OrdinalIgnoreCase) && e.User.IsAdmin)
+            var message = e.Message.Trim().ToLowerInvariant();
+
+            if (!e.User.IsAdmin)
             {
-                Encounters.StartEncounter(VWorld.Server);
+                return;
+            }
+            if (!message.StartsWith("!randomencounter") && !message.StartsWith("!re "))
+            {
+                return;
+            }
+
+            var command = message.Replace("!re", string.Empty).Replace("!randomencounter", string.Empty);
+            switch (command)
+            {
+                case "":
+                case " start":
+                    Encounters.StartEncounter(VWorld.Server);
+                    return;
+                case " me":
+                    Encounters.StartEncounter(VWorld.Server, UserModel.FromUser(VWorld.Server, e.User, e.SenderUserEntity));
+                    break;
+                case " reload":
+                    var currentStatus = PluginConfig.Enabled.Value;
+                    PluginConfig.Initialize();
+                    if (!currentStatus && PluginConfig.Enabled.Value)
+                    {
+                        StartEncounterTimer();
+                    }
+
+                    if (!PluginConfig.Enabled.Value)
+                    {
+                        _encounterTimer.Stop();
+                    }
+                    UserModel.FromUser(VWorld.Server, e.User, e.SenderUserEntity).SendSystemMessage(VWorld.Server, "Reloaded configuration");
+                    break;
+                default:
+                    if (!command.StartsWith(" "))
+                    {
+                        return;
+                    }
+
+                    command = command.Trim();
+                    var onlineUsers = DataFactory.GetOnlineUsers(VWorld.Server);
+                    var foundUser = onlineUsers.FirstOrDefault(u =>
+                        u.CharacterName.Equals(command, StringComparison.OrdinalIgnoreCase));
+
+                    if (foundUser != null)
+                    {
+                        Encounters.StartEncounter(VWorld.Server, foundUser);
+                    }
+                    else
+                    {
+                        UserModel.FromUser(VWorld.Server, e.User, e.SenderUserEntity).SendSystemMessage(VWorld.Server, $"Could not find an online player with name {message}");
+                    }
+                    break;
             }
         }
 
@@ -84,10 +143,10 @@ namespace RandomEncounters
         {
             Chat.OnChatMessage-= Chat_OnChatMessage;
             Config.Clear();
-            _encounterTimer.Stop();
+            _encounterTimer?.Stop();
             TaskRunner.Destroy();
             Encounters.Destroy();
-            _harmonyInstance.UnpatchSelf();
+            _harmonyInstance?.UnpatchSelf();
             Logger.LogInfo($"Plugin {PluginInfo.PLUGIN_GUID} is unloaded!");
             return true;
         }

@@ -3,7 +3,6 @@ using System.IO;
 using System.Linq;
 using System.Text.RegularExpressions;
 using BepInEx.Configuration;
-using RandomEncounters.Models;
 using RandomEncounters.Utils;
 
 namespace RandomEncounters.Configuration
@@ -15,6 +14,7 @@ namespace RandomEncounters.Configuration
         private static ConfigFile _itemsConfig;
 
         public static ConfigEntry<bool> Enabled { get; private set; }
+        public static ConfigEntry<bool> SkipPlayersInCastle { get; private set; }
         public static ConfigEntry<int> EncounterTimerMin { get; private set; }
         public static ConfigEntry<int> EncounterTimerMax { get; private set; }
         public static ConfigEntry<int> EncounterLength { get; private set; }
@@ -22,7 +22,9 @@ namespace RandomEncounters.Configuration
         public static ConfigEntry<int> EncounterMaxLevelDifferenceUpper { get; private set; }
         public static ConfigEntry<string> EncounterMessageTemplate { get; private set; }
         public static ConfigEntry<string> RewardMessageTemplate { get; private set; }
+        public static ConfigEntry<string> RewardAnnouncementMessageTemplate { get; private set; }
         public static ConfigEntry<bool> NotifyAdminsAboutEncountersAndRewards { get; private set; }
+        public static ConfigEntry<bool> NotifyAllPlayersAboutRewards { get; private set; }
 
         public static Dictionary<int, ConfigEntry<bool>> Npcs = new();
         public static Dictionary<int, ConfigEntry<bool>> Items = new();
@@ -42,14 +44,17 @@ namespace RandomEncounters.Configuration
             _itemsConfig = File.Exists(itemsConfigFilePath) ? new ConfigFile(itemsConfigFilePath, false) : new ConfigFile(itemsConfigFilePath, true);
 
             Enabled = _mainConfig.Bind("Main", "Enabled", true, "Determines whether the random encounters are enabled or not.");
+            SkipPlayersInCastle = _mainConfig.Bind("Main", "SkipPlayersInCastle", true, "When enabled, players who are in a castle are excluded from encounters");
             EncounterTimerMin = _mainConfig.Bind("Main", "EncounterTimerMin", 1200, "Minimum seconds before a new encounter is initiated. This value is divided by the online users count.");
             EncounterTimerMax = _mainConfig.Bind("Main", "EncounterTimerMax", 2400, "Maximum seconds before a new encounter is initiated. This value is divided by the online users count.");
             EncounterLength = _mainConfig.Bind("Main", "EncounterLength", 120, "Maximum seconds until the player can kill the NPC for a reward.");
-            EncounterMaxLevelDifferenceLower = _mainConfig.Bind("Main", "EncounterMinLevelDifference", 99, "The lower value for the NPC level - Player level difference.");
-            EncounterMaxLevelDifferenceUpper = _mainConfig.Bind("Main", "EncounterMaxLevelDifference", 0, "The upper value for the NPC level - Player level difference.");
+            EncounterMaxLevelDifferenceLower = _mainConfig.Bind("Main", "EncounterMinLevelDifference", 99, "The lower value for the NPC level - Player level difference. For example, if player level is 50, and this setting is 20, then the lowest level of the spawned NPC would be 30.");
+            EncounterMaxLevelDifferenceUpper = _mainConfig.Bind("Main", "EncounterMaxLevelDifference", 0, "The upper value for the NPC level - Player level difference.  For example, if player level is 50, and this setting is 20, then the highest level of the spawned NPC would be 70.");
             EncounterMessageTemplate = _mainConfig.Bind("Main", "EncounterMessageTemplate", "You have encountered a <color=#daa520>{0}</color>. You have <color=#daa520>{1}</color> seconds to kill it for a chance of a random reward.", "System message template for the encounter.");
             RewardMessageTemplate = _mainConfig.Bind("Main", "RewardMessageTemplate", "Congratulations. Your reward: <color={0}>{1}</color>.", "System message template for the reward.");
+            RewardAnnouncementMessageTemplate = _mainConfig.Bind("Main", "RewardAnnouncementMessageTemplate", "{0} earned an encounter reward: <color={1}>{2}</color>.", "System message template for the reward announcement.");
             NotifyAdminsAboutEncountersAndRewards = _mainConfig.Bind("Main", "NotifyAdminsAboutEncountersAndRewards", true, "If enabled, all online admins are notified about encounters and rewards.");
+            NotifyAllPlayersAboutRewards = _mainConfig.Bind("Main", "NotifyAllPlayersAboutRewards", false, "If enabled, all online players are notified about any player's rewards.");
             foreach (var npcModel in DataFactory.GetAllNpcs().OrderBy(i => i.Name))
             {
                 Npcs[npcModel.Id] = _npcsConfig.Bind("NPCs", npcModel.PrefabName, true,

@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Concurrent;
+using System.Linq;
 using ProjectM;
 using ProjectM.Network;
 using RandomEncounters.Components;
@@ -49,28 +50,38 @@ namespace RandomEncounters
                     var userModel = UserModel.FromUser(sender.World, user, deathEvent.Killer);
                     UnityUtils.AddItemToInventory(sender.World, userModel, itemModel.Id, 1);
                     var message = string.Format(PluginConfig.RewardMessageTemplate.Value, itemModel.Color, itemModel.Name);
-                    ServerChatUtils.SendSystemMessageToClient(sender.EntityManager, user, message);
+                    userModel.SendSystemMessage(sender.World, message);
                     bounties.TryRemove(deathEvent.Died.Index, out _);
                     Logger.LogInfo($"{userModel.CharacterName} earned reward: {itemModel.Name}");
-                    if (PluginConfig.NotifyAdminsAboutEncountersAndRewards.Value)
+                    var globalMessage = string.Format(PluginConfig.RewardAnnouncementMessageTemplate.Value,
+                        user.CharacterName, itemModel.Color, itemModel.Name);
+                    if (PluginConfig.NotifyAllPlayersAboutRewards.Value)
+                    {
+                        var onlineUsers = DataFactory.GetOnlineUsers(sender.World);
+                        foreach (var model in onlineUsers.Where(u => u.PlatformId != userModel.PlatformId))
+                        {
+                            model.SendSystemMessage(sender.World, globalMessage);
+                        }
+
+                    }
+                    else if (PluginConfig.NotifyAdminsAboutEncountersAndRewards.Value)
                     {
                         var onlineAdmins = DataFactory.GetOnlineadmins(sender.World);
                         foreach (var onlineAdmin in onlineAdmins)
                         {
-                            ServerChatUtils.SendSystemMessageToClient(sender.World.EntityManager, onlineAdmin.User, $"{user.CharacterName} earned an encounter reward: <color={itemModel.Color}>{itemModel.Name}</color>");
+                            onlineAdmin.SendSystemMessage(sender.World, $"{user.CharacterName} earned an encounter reward: <color={itemModel.Color}>{itemModel.Name}</color>");
                         }
                     }
-
                 }
             }
         }
 
-        internal static void StartEncounter(World world)
+        internal static void StartEncounter(World world, UserModel user = null)
         {
-            var user = DataFactory.GetRandomUser(world);
+            user ??= DataFactory.GetRandomUser(world, PluginConfig.SkipPlayersInCastle.Value);
             if (user == null)
             {
-                Logger.LogMessage("No one is online...");
+                Logger.LogMessage("No one is online or everyone is in a castle...");
                 return;
             }
 
@@ -82,7 +93,7 @@ namespace RandomEncounters
             }
             Logger.LogMessage($"Attempting to start a new encounter for {user.CharacterName} with {npc.Name}");
             world.GetExistingSystem<UnitSpawnerUpdateSystem>().SpawnUnit(StationEntity, new PrefabGUID(npc.Id), user.LocalToWorld.Position, 1, 2, 4, Lifetime);
-            TaskRunner.Start(taskWorld => AfterSpawn(user.PlatformId, taskWorld, npc), TimeSpan.FromMilliseconds(500));
+            TaskRunner.Start(taskWorld => AfterSpawn(user.PlatformId, taskWorld, npc), TimeSpan.FromMilliseconds(1000));
         }
 
         private static object AfterSpawn(ulong userPlatformId, World world, NpcModel npc)
@@ -146,8 +157,7 @@ namespace RandomEncounters
                         npc.Name, Lifetime);
 
                 //world.EntityManager.SetComponentData(foundEntity, new UnitLevel { Level = (int)user.Level });
-
-                ServerChatUtils.SendSystemMessageToClient(world.EntityManager, user.User, message);
+                user.SendSystemMessage(world, message);
                 Logger.LogInfo($"Encounters started: {user.CharacterName} vs. {npc.Name}");
 
                 if (PluginConfig.NotifyAdminsAboutEncountersAndRewards.Value)
@@ -155,7 +165,7 @@ namespace RandomEncounters
                     var onlineAdmins = DataFactory.GetOnlineadmins(world);
                     foreach (var onlineAdmin in onlineAdmins)
                     {
-                        ServerChatUtils.SendSystemMessageToClient(world.EntityManager, onlineAdmin.User, $"Encounter started: {user.CharacterName} vs. {npc.Name}");
+                        onlineAdmin.SendSystemMessage(world, $"Encounter started: {user.CharacterName} vs. {npc.Name}");
                     }
                 }
                 RewardsMap[user.PlatformId][foundEntity.Index] = DataFactory.GetRandomItem();

@@ -1,6 +1,8 @@
 ﻿using System;
 using ProjectM;
+using ProjectM.CastleBuilding;
 using ProjectM.Network;
+using Unity.Collections;
 using Unity.Entities;
 using Unity.Transforms;
 
@@ -40,6 +42,27 @@ public class UserModel
         return model;
     }
 
+    public bool IsInCastle(World world)
+    {
+        var query = world.EntityManager.CreateEntityQuery(
+            ComponentType.ReadOnly<PrefabGUID>(),
+            ComponentType.ReadOnly<LocalToWorld>(),
+            ComponentType.ReadOnly<UserOwner>(),
+            ComponentType.ReadOnly<CastleFloor>());
+        var entities = query.ToEntityArray(Allocator.Temp);
+        foreach (var entity in entities)
+        {
+            var localToWorld = world.EntityManager.GetComponentData<LocalToWorld>(entity);
+            var position = localToWorld.Position;
+            var userPosition = LocalToWorld.Position;
+            if (Math.Abs(userPosition.x - position.x) < 3 && Math.Abs(userPosition.z - position.z) < 3)
+            {
+                return true;
+            }
+        }
+        return false;
+    }
+
     public float Level { get; set; }
 
     public FromCharacter FromCharacter { get; set; }
@@ -63,4 +86,9 @@ public class UserModel
     public ulong PlatformId { get; set; }
 
     public int Index { get; set; }
+
+    public void SendSystemMessage(World world, string message)
+    {
+        ServerChatUtils.SendSystemMessageToClient(world.EntityManager, User, message);
+    }
 }

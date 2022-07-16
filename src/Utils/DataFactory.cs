@@ -41,9 +41,13 @@ namespace RandomEncounters.Utils
                 .GetRandomItem();
         }
 
-        internal static UserModel GetRandomUser(World world)
+        internal static UserModel GetRandomUser(World world, bool skipPlayersInCastle = false)
         {
             var users = GetOnlineUsers(world);
+            if (skipPlayersInCastle)
+            {
+                users = users.Where(u => !u.IsInCastle(world)).ToList();
+            }
             return users.GetRandomItem();
         }
 
@@ -86,7 +90,7 @@ namespace RandomEncounters.Utils
         }
 
 
-        private static List<UserModel> GetOnlineUsers(World world)
+        public static List<UserModel> GetOnlineUsers(World world)
         {
             var query = world.EntityManager.CreateEntityQuery(ComponentType.ReadOnly<User>());
             var users = query.ToEntityArray(Allocator.Temp);
