@@ -24,8 +24,11 @@ All chat commands use the default prefix of `!randomencounter` or `!re`. They ar
 ### Commands
 
 `!re start` or just `!re`: Starts an encounter for a random online user.
+
 `!re me`: Starts an encounter for the admin who sends the command.
+
 `!re reload`: Reloads the configuration without restarting the mod.
+
 `!re {playerName}`: Starts an encounter for the given player, for example `!re Adain`
 
 ## Configuration files and options:
