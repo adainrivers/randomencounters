@@ -15,7 +15,7 @@ https://github.com/adainrivers/randomencounters
 
 Random Encounters mod requires Wetstone plugin installed. The latest version of Wetstone can be downloaded from https://v-rising.thunderstore.io/package/molenzwiebel/Wetstone/
 
-If you are not planning to use the hot reload feature of Wetstone, simply place the plugin dll into `BepInEx\plugins` folder and run the server. Otherwise, please check [Wetstone documentation](https://molenzwiebel.github.io/Wetstone/features/reload.html) about how to place the mod to the correct folder.
+**Since version 0.7.0, the hot reloading feature of Wetstone does NOT work for RandomEncounters. Instead, please use the `!re reload` feature after you make an configuration change.**
 
 ## Chat Commands
 
@@ -27,9 +27,13 @@ All chat commands use the default prefix of `!randomencounter` or `!re`. They ar
 
 `!re me`: Starts an encounter for the admin who sends the command.
 
-`!re reload`: Reloads the configuration without restarting the mod.
+`!re reload`: Reloads the configuration without restarting the server.
 
-`!re {playerName}`: Starts an encounter for the given player, for example `!re Adain`
+`!re {playerName}`: Starts an encounter for the given player, for example `!re Adain`.
+
+`!re disable`: Disables the random encounter timer.
+
+`!re enabled`: Enables the random encounter timer.
 
 ## Configuration files and options:
 
@@ -37,7 +41,7 @@ All chat commands use the default prefix of `!randomencounter` or `!re`. They ar
 ```
 [Main]
 
-## Determines whether the random encounters are enabled or not.
+## Determines whether the random encounter timer is enabled or not.
 # Setting type: Boolean
 # Default value: true
 Enabled = true
@@ -46,6 +50,11 @@ Enabled = true
 # Setting type: Boolean
 # Default value: true
 SkipPlayersInCastle = true
+
+## When enabled, players who are in combat are excluded from the random encounters.
+# Setting type: Boolean
+# Default value: false
+SkipPlayersInCombat = false
 
 ## Minimum seconds before a new encounter is initiated. This value is divided by the online users count.
 # Setting type: Int32
@@ -65,12 +74,12 @@ EncounterLength = 120
 ## The lower value for the NPC level - Player level difference. For example, if player level is 50, and this setting is 20, then the lowest level of the spawned NPC would be 30.
 # Setting type: Int32
 # Default value: 99
-EncounterMaxLevelDifferenceLower = 99
+EncounterMinLevelDifference = 99
 
 ## The upper value for the NPC level - Player level difference.  For example, if player level is 50, and this setting is 20, then the highest level of the spawned NPC would be 70.
 # Setting type: Int32
 # Default value: 0
-EncounterMaxLevelDifferenceUpper = 0
+EncounterMaxLevelDifference = 0
 
 ## System message template for the encounter.
 # Setting type: String
@@ -92,10 +101,22 @@ RewardAnnouncementMessageTemplate = {0} earned an encounter reward: <color={1}>{
 # Default value: true
 NotifyAdminsAboutEncountersAndRewards = true
 
-## If enabled, all online players are notified about any player's rewards.
+## When enabled, all online players are notified about any player's rewards.
 # Setting type: Boolean
 # Default value: false
 NotifyAllPlayersAboutRewards = false
+
+## Minimum spawn distance for the spawned unit.
+# Setting type: Int32
+# Default value: 2
+MinSpawnDistance = 2
+
+## Maximum spawn distance for the spawned unit.
+# Setting type: Int32
+# Default value: 4
+MaxSpawnDistance = 4
+
+
 ```
 
 ### Items.cfg

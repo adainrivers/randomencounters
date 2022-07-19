@@ -6,9 +6,10 @@ using BepInEx.Logging;
 using HarmonyLib;
 using RandomEncounters.Components;
 using RandomEncounters.Configuration;
-using RandomEncounters.Models;
 using RandomEncounters.Patch;
 using RandomEncounters.Utils;
+using VRising.GameData;
+using VRising.GameData.Methods;
 using Wetstone.API;
 using Wetstone.Hooks;
 
@@ -16,15 +17,13 @@ namespace RandomEncounters
 {
     [BepInPlugin(PluginGuid, PluginName, PluginVersion)]
     [BepInDependency("xyz.molenzwiebel.wetstone")]
-    [Reloadable]
-    public class Plugin : BasePlugin
+    public class Plugin : BasePlugin, IRunOnInitialized
     {
         public const string PluginGuid = "gamingtools.RandomEncounters";
         public const string PluginName = "RandomEncounters";
-        public const string PluginVersion = "0.6.0";
+        public const string PluginVersion = "0.7.0";
 
         internal static ManualLogSource Logger { get; private set; }
-
 
         private static Harmony _harmonyInstance;
         private static Timer _encounterTimer;
@@ -60,7 +59,7 @@ namespace RandomEncounters
                 world =>
                 {
                     Logger.LogInfo("Starting an encounter.");
-                    Encounters.StartEncounter(world);
+                    Encounters.StartEncounter();
                 },
                 input =>
                 {
@@ -74,12 +73,12 @@ namespace RandomEncounters
                         onlineUsersCount = 1;
                     }
                     var seconds = new Random().Next(PluginConfig.EncounterTimerMin.Value, PluginConfig.EncounterTimerMax.Value);
-                    Logger.LogInfo($"Next encounter will start in {seconds} seconds.");
+                    Logger.LogInfo($"Next encounter will start in {seconds / onlineUsersCount} seconds.");
                     return TimeSpan.FromSeconds(seconds) / onlineUsersCount;
                 });
         }
 
-        private void Chat_OnChatMessage(VChatEvent e)
+        internal static void Chat_OnChatMessage(VChatEvent e)
         {
             var message = e.Message.Trim().ToLowerInvariant();
 
@@ -87,20 +86,42 @@ namespace RandomEncounters
             {
                 return;
             }
-            if (!message.StartsWith("!randomencounter") && !message.StartsWith("!re "))
+            if (!message.StartsWith("!randomencounter") && !message.StartsWith("!re"))
             {
                 return;
             }
 
+            var senderModel = GameData.Users.GetUserFromEntity(e.SenderUserEntity);
             var command = message.Replace("!re", string.Empty).Replace("!randomencounter", string.Empty);
             switch (command)
             {
                 case "":
                 case " start":
-                    Encounters.StartEncounter(VWorld.Server);
+                    Encounters.StartEncounter();
                     return;
                 case " me":
-                    Encounters.StartEncounter(VWorld.Server, UserModel.FromUser(VWorld.Server, e.User, e.SenderUserEntity));
+                    Logger.LogWarning($"{senderModel.CharacterName} InCombat: {senderModel.IsInCombat()}");
+                    Encounters.StartEncounter(senderModel);
+                    break;
+                case " disable":
+                    if (!PluginConfig.Enabled.Value)
+                    {
+                        senderModel.SendSystemMessage("Already disabled.");
+                        return;
+                    }
+                    PluginConfig.Enabled.Value = false;
+                    _encounterTimer.Stop();
+                    senderModel.SendSystemMessage("Disabled.");
+                    break;
+                case " enable":
+                    if (PluginConfig.Enabled.Value)
+                    {
+                        senderModel.SendSystemMessage("Already enabled.");
+                        return;
+                    }
+                    PluginConfig.Enabled.Value = true;
+                    StartEncounterTimer();
+                    senderModel.SendSystemMessage("Enabled.");
                     break;
                 case " reload":
                     var currentStatus = PluginConfig.Enabled.Value;
@@ -114,7 +135,7 @@ namespace RandomEncounters
                     {
                         _encounterTimer.Stop();
                     }
-                    UserModel.FromUser(VWorld.Server, e.User, e.SenderUserEntity).SendSystemMessage(VWorld.Server, "Reloaded configuration");
+                    senderModel.SendSystemMessage("Reloaded configuration");
                     break;
                 default:
                     if (!command.StartsWith(" "))
@@ -123,17 +144,17 @@ namespace RandomEncounters
                     }
 
                     command = command.Trim();
-                    var onlineUsers = DataFactory.GetOnlineUsers(VWorld.Server);
+                    var onlineUsers = GameData.Users.GetOnlineUsers();
                     var foundUser = onlineUsers.FirstOrDefault(u =>
                         u.CharacterName.Equals(command, StringComparison.OrdinalIgnoreCase));
 
                     if (foundUser != null)
                     {
-                        Encounters.StartEncounter(VWorld.Server, foundUser);
+                        Encounters.StartEncounter(foundUser);
                     }
                     else
                     {
-                        UserModel.FromUser(VWorld.Server, e.User, e.SenderUserEntity).SendSystemMessage(VWorld.Server, $"Could not find an online player with name {message}");
+                        senderModel.SendSystemMessage($"Could not find an online player with name {message}");
                     }
                     break;
             }
@@ -149,6 +170,11 @@ namespace RandomEncounters
             _harmonyInstance?.UnpatchSelf();
             Logger.LogInfo($"Plugin {PluginInfo.PLUGIN_GUID} is unloaded!");
             return true;
+        }
+
+        public void OnGameInitialized()
+        {
+            GameData.Initialize();
         }
     }
 }

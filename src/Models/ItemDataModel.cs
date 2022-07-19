@@ -1,8 +1,8 @@
 ﻿namespace RandomEncounters.Models
 {
-    public class ItemModel
+    public class ItemDataModel
     {
-        public ItemModel(string line)
+        public ItemDataModel(string line)
         {
             var fields = line.Split("\t");
             if (fields.Length != 4)

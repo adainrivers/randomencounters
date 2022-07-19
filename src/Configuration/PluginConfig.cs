@@ -25,6 +25,9 @@ namespace RandomEncounters.Configuration
         public static ConfigEntry<string> RewardAnnouncementMessageTemplate { get; private set; }
         public static ConfigEntry<bool> NotifyAdminsAboutEncountersAndRewards { get; private set; }
         public static ConfigEntry<bool> NotifyAllPlayersAboutRewards { get; private set; }
+        public static ConfigEntry<int> MinSpawnDistance { get; private set; }
+        public static ConfigEntry<int> MaxSpawnDistance { get; private set; }
+        public static ConfigEntry<bool> SkipPlayersInCombat { get; private set; }
 
         public static Dictionary<int, ConfigEntry<bool>> Npcs = new();
         public static Dictionary<int, ConfigEntry<bool>> Items = new();
@@ -43,8 +46,9 @@ namespace RandomEncounters.Configuration
             var itemsConfigFilePath = Path.Combine(configFolder, "Items.cfg");
             _itemsConfig = File.Exists(itemsConfigFilePath) ? new ConfigFile(itemsConfigFilePath, false) : new ConfigFile(itemsConfigFilePath, true);
 
-            Enabled = _mainConfig.Bind("Main", "Enabled", true, "Determines whether the random encounters are enabled or not.");
+            Enabled = _mainConfig.Bind("Main", "Enabled", true, "Determines whether the random encounter timer is enabled or not.");
             SkipPlayersInCastle = _mainConfig.Bind("Main", "SkipPlayersInCastle", true, "When enabled, players who are in a castle are excluded from encounters");
+            SkipPlayersInCombat = _mainConfig.Bind("Main", "SkipPlayersInCombat", false, "When enabled, players who are in combat are excluded from the random encounters.");
             EncounterTimerMin = _mainConfig.Bind("Main", "EncounterTimerMin", 1200, "Minimum seconds before a new encounter is initiated. This value is divided by the online users count.");
             EncounterTimerMax = _mainConfig.Bind("Main", "EncounterTimerMax", 2400, "Maximum seconds before a new encounter is initiated. This value is divided by the online users count.");
             EncounterLength = _mainConfig.Bind("Main", "EncounterLength", 120, "Maximum seconds until the player can kill the NPC for a reward.");
@@ -54,7 +58,9 @@ namespace RandomEncounters.Configuration
             RewardMessageTemplate = _mainConfig.Bind("Main", "RewardMessageTemplate", "Congratulations. Your reward: <color={0}>{1}</color>.", "System message template for the reward.");
             RewardAnnouncementMessageTemplate = _mainConfig.Bind("Main", "RewardAnnouncementMessageTemplate", "{0} earned an encounter reward: <color={1}>{2}</color>.", "System message template for the reward announcement.");
             NotifyAdminsAboutEncountersAndRewards = _mainConfig.Bind("Main", "NotifyAdminsAboutEncountersAndRewards", true, "If enabled, all online admins are notified about encounters and rewards.");
-            NotifyAllPlayersAboutRewards = _mainConfig.Bind("Main", "NotifyAllPlayersAboutRewards", false, "If enabled, all online players are notified about any player's rewards.");
+            NotifyAllPlayersAboutRewards = _mainConfig.Bind("Main", "NotifyAllPlayersAboutRewards", false, "When enabled, all online players are notified about any player's rewards.");
+            MinSpawnDistance = _mainConfig.Bind("Main", "MinSpawnDistance", 2, "Minimum spawn distance for the spawned unit.");
+            MaxSpawnDistance = _mainConfig.Bind("Main", "MaxSpawnDistance", 4, "Maximum spawn distance for the spawned unit.");
             foreach (var npcModel in DataFactory.GetAllNpcs().OrderBy(i => i.Name))
             {
                 Npcs[npcModel.Id] = _npcsConfig.Bind("NPCs", npcModel.PrefabName, true,
@@ -82,5 +88,4 @@ namespace RandomEncounters.Configuration
         }
 
     }
-
 }
