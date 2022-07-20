@@ -34,7 +34,7 @@ namespace RandomEncounters.Configuration
 
         public static void Initialize()
         {
-            var bepInExConfigFolder = Path.GetDirectoryName(BepInEx.Paths.BepInExConfigPath) ?? Path.Combine("BepInEx", "config");
+            var bepInExConfigFolder = BepInEx.Paths.ConfigPath ?? Path.Combine("BepInEx", "config");
             var configFolder = Path.Combine(bepInExConfigFolder, Plugin.PluginName);
             if (!Directory.Exists(configFolder))
             {
