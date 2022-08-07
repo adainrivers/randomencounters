@@ -1,8 +1,8 @@
 ﻿using System;
 using System.Collections.Concurrent;
+using System.Collections.Generic;
 using System.Linq;
 using ProjectM;
-using RandomEncounters.Components;
 using RandomEncounters.Configuration;
 using RandomEncounters.Models;
 using RandomEncounters.Patch;
@@ -19,19 +19,168 @@ namespace RandomEncounters
 {
     internal static class Encounters
     {
-        public static ConcurrentDictionary<ulong, ConcurrentDictionary<int, ItemDataModel>> RewardsMap = new();
+        private static readonly ConcurrentDictionary<ulong, ConcurrentDictionary<int, ItemDataModel>> RewardsMap = new();
+        private static readonly ConcurrentDictionary<int, UserModel> NpcPlayerMap = new();
+
         private static readonly Entity StationEntity = new();
         private static float Lifetime => PluginConfig.EncounterLength.Value;
         private static string MessageTemplate => PluginConfig.EncounterMessageTemplate.Value;
 
+        private static Entity test;
+
+        public static Random Random = new Random();
+
         internal static void Initialize()
         {
             ServerEvents.OnDeath += ServerEvents_OnDeath;
+            ServerEvents.OnUnitSpawned += ServerEvents_OnUnitSpawned;
         }
 
         internal static void Destroy()
         {
             ServerEvents.OnDeath -= ServerEvents_OnDeath;
+            ServerEvents.OnUnitSpawned -= ServerEvents_OnUnitSpawned;
+        }
+
+        internal static void StartEncounter(UserModel user = null)
+        {
+            var world = GameData.World;
+
+            if (user == null)
+            {
+                var users = GameData.Users.GetOnlineUsers();
+                if (PluginConfig.SkipPlayersInCastle.Value)
+                {
+                    users = users.Where(u => !u.IsInCastle());
+                }
+
+                if (PluginConfig.SkipPlayersInCombat.Value)
+                {
+                    users = users.Where(u => !u.IsInCombat());
+                }
+                user = users.OrderBy(_ => Random.Next()).FirstOrDefault();
+            }
+
+            if (user == null)
+            {
+                Logger.LogMessage("Could not find any eligible players for a random encounter...");
+                return;
+            }
+
+            var npc = DataFactory.GetRandomNpc(user.Character.Equipment.Level);
+            if (npc == null)
+            {
+                Logger.LogWarning($"Could not find any NPCs within the given level range. (User Level: {user.Character.Equipment.Level})");
+                return;
+            }
+            Logger.LogMessage($"Attempting to start a new encounter for {user.CharacterName} with {npc.Name}");
+            var minSpawnDistance = PluginConfig.MinSpawnDistance.Value;
+            var maxSpawnDistance = PluginConfig.MaxSpawnDistance.Value;
+            try
+            {
+                //var prefabCollectionSystem = world.GetExistingSystem<PrefabCollectionSystem>();
+                //var npcPrefabEntity = prefabCollectionSystem.PrefabLookupMap[new PrefabGUID(npc.Id)];
+                //test = world.EntityManager.Instantiate(npcPrefabEntity);
+                //world.EntityManager.AddComponent(test, ComponentType.ReadOnly<Age>());
+                //world.EntityManager.AddComponent(test, ComponentType.ReadWrite<LifeTime>());
+                //world.EntityManager.AddComponent(test, ComponentType.ReadWrite<UnitSpawnHandler>());
+                //world.EntityManager.SetComponentData(test, new LifeTime { Duration = Lifetime, EndAction = LifeTimeEndAction.Destroy });
+                //world.EntityManager.SetComponentData(test, GameData.Users.GetUserByPlatformId(user.PlatformId).Internals.LocalToWorld.Value);
+                //world.EntityManager.SetComponentData(test, new UnitSpawnHandler{StationEntity = StationEntity});
+
+                world.GetExistingSystem<UnitSpawnerUpdateSystem>()
+                    .SpawnUnit(StationEntity, new PrefabGUID(npc.Id), user.Position, 1, minSpawnDistance, maxSpawnDistance, Lifetime);
+            }
+            catch(Exception ex)
+            {
+                Plugin.Logger.LogError(ex);
+                // Suppress
+            }
+            NpcPlayerMap[npc.Id] = user;
+            //TaskRunner.Start(taskWorld => AfterSpawn(user.PlatformId, taskWorld, npc), TimeSpan.FromMilliseconds(1000));
+        }
+
+        private static void ServerEvents_OnUnitSpawned(World world, Entity entity)
+        {
+            var entityManager = world.EntityManager;
+            if (!entityManager.HasComponent<PrefabGUID>(entity))
+            {
+                return;
+            }
+
+            var prefabGuid = entityManager.GetComponentData<PrefabGUID>(entity);
+            if (!NpcPlayerMap.TryGetValue(prefabGuid.GuidHash, out var user))
+            {
+                return;
+            }
+            if (!entityManager.HasComponent<LifeTime>(entity))
+            {
+                return;
+            }
+            var lifeTime = entityManager.GetComponentData<LifeTime>(entity);
+            if (Math.Abs(lifeTime.Duration - Lifetime) > 0.001)
+            {
+                return;
+            }
+
+            var npcData = DataFactory.GetAllNpcs().FirstOrDefault(n => n.Id == prefabGuid.GuidHash);
+            if (npcData == null)
+            {
+                return;
+            }
+
+            var foundEntity = entity;
+
+            var testComponentTypes = new HashSet<string>();
+            var testComponents = world.EntityManager.GetComponentTypes(test);
+            foreach (var component in testComponents)
+            {
+                testComponentTypes.Add(component.GetManagedType().FullName);
+            }
+
+            var foundComponentTypes = new HashSet<string>();
+            var foundComponents = world.EntityManager.GetComponentTypes(foundEntity);
+            foreach (var component in foundComponents)
+            {
+                foundComponentTypes.Add(component.GetManagedType().FullName);
+            }
+
+            var missingInTest = foundComponentTypes.Except(testComponentTypes);
+            var missingInFound = testComponentTypes.Except(foundComponentTypes);
+
+            foreach (var missingComponent in missingInTest)
+            {
+                Plugin.Logger.LogWarning(missingComponent);
+            }
+
+            if (world.EntityManager.HasComponent<LocalToWorld>(test))
+            {
+                var localToWorld = world.EntityManager.GetComponentData<LocalToWorld>(test);
+                Plugin.Logger.LogWarning($"Test at {localToWorld.Position.x} {localToWorld.Position.z}");
+            }
+
+
+            if (!RewardsMap.ContainsKey(user.PlatformId))
+            {
+                RewardsMap[user.PlatformId] = new ConcurrentDictionary<int, ItemDataModel>();
+            }
+            var message =
+                string.Format(
+                    MessageTemplate,
+                    npcData.Name, Lifetime);
+
+            user.SendSystemMessage(message);
+            Logger.LogInfo($"Encounters started: {user.CharacterName} vs. {npcData.Name}");
+
+            if (PluginConfig.NotifyAdminsAboutEncountersAndRewards.Value)
+            {
+                var onlineAdmins = DataFactory.GetOnlineAdmins(world);
+                foreach (var onlineAdmin in onlineAdmins)
+                {
+                    onlineAdmin.SendSystemMessage($"Encounter started: {user.CharacterName} vs. {npcData.Name}");
+                }
+            }
+            RewardsMap[user.PlatformId][foundEntity.Index] = DataFactory.GetRandomItem();
         }
 
         private static void ServerEvents_OnDeath(DeathEventListenerSystem sender, NativeArray<DeathEvent> deathEvents)
@@ -51,9 +200,10 @@ namespace RandomEncounters
                     bounties.TryGetValue(deathEvent.Died.Index, out var itemModel))
                 {
                     var itemGuid = new PrefabGUID(itemModel.Id);
-                    if (!userModel.TryGiveItem(new PrefabGUID(itemModel.Id), 1, out _))
+                    var quantity = PluginConfig.Items[itemModel.Id];
+                    if (!userModel.TryGiveItem(new PrefabGUID(itemModel.Id), quantity.Value, out _))
                     {
-                        userModel.DropItemNearby(itemGuid, 1);
+                        userModel.DropItemNearby(itemGuid, quantity.Value);
                     }
                     var message = string.Format(PluginConfig.RewardMessageTemplate.Value, itemModel.Color, itemModel.Name);
                     userModel.SendSystemMessage(message);
@@ -80,99 +230,6 @@ namespace RandomEncounters
                     }
                 }
             }
-        }
-
-        internal static void StartEncounter(UserModel user = null)
-        {
-            var world = GameData.World;
-
-            if (user == null)
-            {
-                var users = GameData.Users.GetOnlineUsers();
-                if (PluginConfig.SkipPlayersInCastle.Value)
-                {
-                    users = users.Where(u => !u.IsInCastle());
-                }
-
-                if (PluginConfig.SkipPlayersInCombat.Value)
-                {
-                    users = users.Where(u => !u.IsInCombat());
-                }
-                user = users.FirstOrDefault();
-            }
-
-            if (user == null)
-            {
-                Logger.LogMessage("Could not find any eligible players for a random encounter...");
-                return;
-            }
-
-            var npc = DataFactory.GetRandomNpc(user.Character.Equipment.Level);
-            if (npc == null)
-            {
-                Logger.LogWarning($"Could not find any NPCs within the given level range. (User Level: {user.Character.Equipment.Level})");
-                return;
-            }
-            Logger.LogMessage($"Attempting to start a new encounter for {user.CharacterName} with {npc.Name}");
-            var minSpawnDistance = PluginConfig.MinSpawnDistance.Value;
-            var maxSpawnDistance = PluginConfig.MaxSpawnDistance.Value;
-            world.GetExistingSystem<UnitSpawnerUpdateSystem>().SpawnUnit(StationEntity, new PrefabGUID(npc.Id), user.Position, 1, minSpawnDistance, maxSpawnDistance, Lifetime);
-            TaskRunner.Start(taskWorld => AfterSpawn(user.PlatformId, taskWorld, npc), TimeSpan.FromMilliseconds(1000));
-        }
-
-        private static object AfterSpawn(ulong userPlatformId, World world, NpcDataModel npcData)
-        {
-
-            var user = GameData.Users.GetUserByPlatformId(userPlatformId);
-            if (user == null)
-            {
-                return null;
-            }
-            Logger.LogDebug($"User is at {user.Position.x} {user.Position.z}");
-            var possibleEntitiesQuery =
-                world.EntityManager.CreateEntityQuery(ComponentType.ReadOnly<PrefabGUID>(),
-                    ComponentType.ReadOnly<LocalToWorld>(),
-                    ComponentType.ReadOnly<AggroConsumer>(),
-                    ComponentType.ReadOnly<LifeTime>());
-
-            var foundEntity = possibleEntitiesQuery.AsNpcs()
-                .FirstOrDefault(e =>
-                    e.PrefabGUID.GuidHash == npcData.Id &&
-                    Math.Abs(e.LifeTime - Lifetime) < 0.001 &&
-                    !e.IsDead &&
-                    e.Position.Distance(user.Position) < 50 + PluginConfig.MaxSpawnDistance.Value);
-
-            if (foundEntity != null)
-            {
-                if (!RewardsMap.ContainsKey(user.PlatformId))
-                {
-                    RewardsMap[user.PlatformId] = new ConcurrentDictionary<int, ItemDataModel>();
-                }
-                var message =
-                    string.Format(
-                        MessageTemplate,
-                        npcData.Name, Lifetime);
-
-                user.SendSystemMessage(message);
-                Logger.LogInfo($"Encounters started: {user.CharacterName} vs. {npcData.Name}");
-
-                if (PluginConfig.NotifyAdminsAboutEncountersAndRewards.Value)
-                {
-                    var onlineAdmins = DataFactory.GetOnlineAdmins(world);
-                    foreach (var onlineAdmin in onlineAdmins)
-                    {
-                        onlineAdmin.SendSystemMessage($"Encounter started: {user.CharacterName} vs. {npcData.Name}");
-                    }
-                }
-                RewardsMap[user.PlatformId][foundEntity.Entity.Index] = DataFactory.GetRandomItem();
-            }
-            else
-            {
-                Logger.LogWarning("Could not find the spawned entity.");
-            }
-
-
-            return new object();
         }
     }
 }

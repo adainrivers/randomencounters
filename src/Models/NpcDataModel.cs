@@ -1,7 +1,15 @@
-﻿namespace RandomEncounters.Models
+﻿using System;
+using ProjectM;
+using VRising.GameData;
+using VRising.GameData.Models;
+using Wetstone.API;
+
+namespace RandomEncounters.Models
 {
     public class NpcDataModel
     {
+        private NpcModel _npcModel;
+
         public NpcDataModel(string npcLine)
         {
             var fields = npcLine.Split("\t");
@@ -21,5 +29,22 @@
         public string PrefabName { get; set; }
         public int Level { get; set; }
         public string BloodType { get; set; }
+
+        public NpcModel NpcModel => _npcModel ??= new Lazy<NpcModel>(GetNpcModel).Value;
+
+        private NpcModel GetNpcModel()
+        {
+            var world = VWorld.Server;
+            var prefabCollectionSystem = world.GetExistingSystem<PrefabCollectionSystem>();
+            try
+            {
+                var npcEntity = prefabCollectionSystem.PrefabLookupMap[new PrefabGUID(Id)];
+                return GameData.Npcs.GetNpcFromEntity(npcEntity);
+            }
+            catch
+            {
+                return null;
+            }
+        }
     }
 }

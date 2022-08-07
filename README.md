@@ -6,6 +6,18 @@ This server side mod spawns a random NPC near a random online player at random i
 
 It can be configured using the configuration files which are created on first run.
 
+## Change Log
+
+### 0.8.0
+
+- Fixed an issue which was causing the server crash.
+- You can now specify the quantities for each item in `Items.cfg`. Unobtainable items are disabled by default.
+- Increased performance for spawn detection.
+
+### 0.7.1
+
+- Fixed an issue which was causing the same player being picked every time.
+
 ## Source Code
 
 Source code of this mod can be found at:
@@ -121,7 +133,9 @@ MaxSpawnDistance = 4
 
 ### Items.cfg
 
-The list of all the items from the game. Individual items can be enabled or disabled. Only enabled items are considered for the random reward.
+The list of all the items from the game. Individual items can be enabled or disabled. Only enabled items are considered for the random reward. 
+
+*NEW in 0.8.0:* You can now specify the quantities for each item. Unobtainable items are disabled by default.
 
 ### NPCs.cfg
 

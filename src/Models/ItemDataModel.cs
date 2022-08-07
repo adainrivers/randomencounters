@@ -5,7 +5,7 @@
         public ItemDataModel(string line)
         {
             var fields = line.Split("\t");
-            if (fields.Length != 4)
+            if (fields.Length != 5)
             {
                 return;
             }
@@ -14,11 +14,13 @@
             Name = fields[1];
             PrefabName = fields[2];
             Rarity = int.Parse(fields[3]);
+            Obtainable = bool.Parse(fields[4]);
         }
         public int Id { get; set; }
         public string Name { get; set; }
         public string PrefabName { get; set; }
         public int Rarity { get; set; }
+        public bool Obtainable { get; set; }
 
         public string Color =>
             Rarity switch

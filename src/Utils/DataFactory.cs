@@ -6,7 +6,6 @@ using RandomEncounters.Configuration;
 using RandomEncounters.Models;
 using Unity.Entities;
 using VRising.GameData;
-using VRising.GameData.Methods;
 using VRising.GameData.Models;
 
 namespace RandomEncounters.Utils
@@ -20,7 +19,7 @@ namespace RandomEncounters.Utils
         internal static void Initialize()
         {
             var tsv = Encoding.UTF8.GetString(PluginResources.npcs);
-            _npcs = tsv.Split("\r\n", StringSplitOptions.RemoveEmptyEntries).Select(l => new NpcDataModel(l)).ToList();
+            _npcs = tsv.Split("\r\n", StringSplitOptions.RemoveEmptyEntries).Select(l => new NpcDataModel(l)).Where(n => n.NpcModel != null && n.NpcModel.HasDropTable).ToList();
             tsv = Encoding.UTF8.GetString(PluginResources.items);
             _items = tsv.Split("\r\n", StringSplitOptions.RemoveEmptyEntries).Select(l => new ItemDataModel(l)).ToList();
         }
@@ -38,21 +37,11 @@ namespace RandomEncounters.Utils
         internal static ItemDataModel GetRandomItem()
         {
             return _items
-                .Where(n => PluginConfig.Items.TryGetValue(n.Id, out var itemSetting) && itemSetting.Value).ToList()
+                .Where(n => PluginConfig.Items.TryGetValue(n.Id, out var itemSetting) && itemSetting.Value > 0).ToList()
                 .GetRandomItem();
         }
 
-        internal static UserModel GetRandomUser(World world, bool skipPlayersInCastle = false)
-        {
-            var onlineUsers = GameData.Users.GetOnlineUsers();
-            if (skipPlayersInCastle)
-            {
-                onlineUsers = onlineUsers.Where(u => !u.IsInCastle());
-            }
-            return onlineUsers.ToList().GetRandomItem();
-        }
-
-        internal static int GetOnlineUsersCount(World world)
+        internal static int GetOnlineUsersCount()
         {
             return GameData.Users.GetOnlineUsers().Count();
         }

@@ -4,7 +4,7 @@
     <TargetFramework>netstandard2.1</TargetFramework>
     <AssemblyName>RandomEncounters</AssemblyName>
     <Description>A server side mod for V Rising which spawns a random NPC near a random online player at random intervals, and the player wins a random item reward if the NPC is killed within the given time limit.</Description>
-    <Version>0.6.0</Version>
+    <Version>0.8.0</Version>
     <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
     <LangVersion>latest</LangVersion>
     <RestoreSources>
@@ -23,7 +23,6 @@
     <PackageReference Include="Costura.Fody" Version="5.7.0">
       <PrivateAssets>all</PrivateAssets>
     </PackageReference>
-    <PackageReference Include="VRising.GameData" Version="0.1.0" />
     <PackageReference Include="Wetstone" Version="1.1.0" />
   </ItemGroup>
 
@@ -32,6 +31,10 @@
     <Copy SourceFiles="$(TargetDir)$(ProjectName).dll;$(TargetDir)$(ProjectName).pdb" DestinationFolder="$(PluginsPath)" />
     <Message Text="Copied build files" Importance="High" />
   </Target>
+
+  <ItemGroup>
+    <ProjectReference Include="..\..\VRising.GameData\src\VRising.GameData\VRising.GameData.csproj" />
+  </ItemGroup>
 
   <ItemGroup>
     <Reference Include="com.stunlock.console">

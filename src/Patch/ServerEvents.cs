@@ -3,10 +3,12 @@ using HarmonyLib;
 using ProjectM;
 using Unity.Collections;
 using Unity.Entities;
+using UnityEngine;
 
 namespace RandomEncounters.Patch
 {
     public delegate void OnUpdateEventHandler(World world);
+    public delegate void OnUnitSpawnedEventHandler(World world, Entity entity);
     public delegate void ServerStartupStateChangeEventHandler(LoadPersistenceSystemV2 sender, ServerStartupState.State serverStartupState);
     public delegate void DeathEventHandler(DeathEventListenerSystem sender, NativeArray<DeathEvent> deathEvents);
 
@@ -15,7 +17,8 @@ namespace RandomEncounters.Patch
         public static event OnUpdateEventHandler OnUpdate;
         public static event DeathEventHandler OnDeath;
         public static event ServerStartupStateChangeEventHandler OnServerStartupStateChanged;
-        
+        public static event OnUnitSpawnedEventHandler OnUnitSpawned;
+
         [HarmonyPatch(typeof(LoadPersistenceSystemV2), nameof(LoadPersistenceSystemV2.SetLoadState))]
         [HarmonyPrefix]
         private static void ServerStartupStateChange_Prefix(ServerStartupState.State loadState, LoadPersistenceSystemV2 __instance)
@@ -61,6 +64,24 @@ namespace RandomEncounters.Patch
             catch (Exception e)
             {
                 Plugin.Logger.LogError(e);
+            }
+        }
+
+        [HarmonyPatch(typeof(UnitSpawnerReactSystem), nameof(UnitSpawnerReactSystem.OnUpdate))]
+        [HarmonyPostfix]
+        public static void Prefix(UnitSpawnerReactSystem __instance)
+        {
+            var entities = __instance.__OnUpdate_LambdaJob0_entityQuery.ToEntityArray(Allocator.Temp);
+            foreach (var entity in entities)
+            {
+                try
+                {
+                    OnUnitSpawned?.Invoke(__instance.World, entity);
+                }
+                catch (Exception e)
+                {
+                    Plugin.Logger.LogError(e);
+                }
             }
         }
     }

@@ -30,7 +30,8 @@ namespace RandomEncounters.Configuration
         public static ConfigEntry<bool> SkipPlayersInCombat { get; private set; }
 
         public static Dictionary<int, ConfigEntry<bool>> Npcs = new();
-        public static Dictionary<int, ConfigEntry<bool>> Items = new();
+        public static Dictionary<int, ConfigEntry<int>> Items = new();
+
 
         public static void Initialize()
         {
@@ -70,8 +71,8 @@ namespace RandomEncounters.Configuration
 
             foreach (var itemModel in DataFactory.GetAllItems().OrderBy(i => i.Name))
             {
-                Items[itemModel.Id] = _itemsConfig.Bind("Items", itemModel.PrefabName, true,
-                    $"{itemModel.Name} https://gaming.tools/v-rising/items/{itemModel.PrefabName.ToLowerInvariant()}");
+                Items[itemModel.Id] = _itemsConfig.Bind("Items", itemModel.PrefabName, itemModel.Obtainable ? 1: 0,
+                    $"{itemModel.Name} (The value is the quantity, set it to 0 to disable the item) https://gaming.tools/v-rising/items/{itemModel.PrefabName.ToLowerInvariant()}");
             }
         }
 

@@ -4,6 +4,7 @@ using BepInEx;
 using BepInEx.IL2CPP;
 using BepInEx.Logging;
 using HarmonyLib;
+using ProjectM;
 using RandomEncounters.Components;
 using RandomEncounters.Configuration;
 using RandomEncounters.Patch;
@@ -21,36 +22,45 @@ namespace RandomEncounters
     {
         public const string PluginGuid = "gamingtools.RandomEncounters";
         public const string PluginName = "RandomEncounters";
-        public const string PluginVersion = "0.7.0";
+        public const string PluginVersion = "0.8.0";
 
         internal static ManualLogSource Logger { get; private set; }
+        internal static Plugin Instance { get; private set; }
 
         private static Harmony _harmonyInstance;
         private static Timer _encounterTimer;
 
         public override void Load()
         {
+            Instance = this;
             Logger = Log;
-
-            Logger.LogDebug("Loading main data");
-            DataFactory.Initialize();
-            Logger.LogDebug("Binding configuration");
-            PluginConfig.Initialize();
-
-            TaskRunner.Initialize();
-            Encounters.Initialize();
 
             // Plugin startup logic
             Logger.LogInfo($"Plugin {PluginInfo.PLUGIN_GUID} is loaded!");
             _harmonyInstance = new Harmony(PluginInfo.PLUGIN_GUID);
             _harmonyInstance.PatchAll(typeof(ServerEvents));
-            _encounterTimer = new Timer();
-            if (PluginConfig.Enabled.Value)
-            {
-                StartEncounterTimer();
-            }
 
             Chat.OnChatMessage += Chat_OnChatMessage;
+            ServerEvents.OnServerStartupStateChanged += ServerEvents_OnServerStartupStateChanged;
+        }
+
+        private void ServerEvents_OnServerStartupStateChanged(LoadPersistenceSystemV2 sender, ServerStartupState.State serverStartupState)
+        {
+            if (serverStartupState == ServerStartupState.State.SuccessfulStartup)
+            {
+                Logger.LogDebug("Loading main data");
+                DataFactory.Initialize();
+                Logger.LogDebug("Binding configuration");
+                PluginConfig.Initialize();
+
+                Encounters.Initialize();
+
+                _encounterTimer = new Timer();
+                if (PluginConfig.Enabled.Value)
+                {
+                    StartEncounterTimer();
+                }
+            }
         }
 
         private static void StartEncounterTimer()
@@ -162,10 +172,10 @@ namespace RandomEncounters
 
         public override bool Unload()
         {
+            ServerEvents.OnServerStartupStateChanged -= ServerEvents_OnServerStartupStateChanged;
             Chat.OnChatMessage-= Chat_OnChatMessage;
             Config.Clear();
             _encounterTimer?.Stop();
-            TaskRunner.Destroy();
             Encounters.Destroy();
             _harmonyInstance?.UnpatchSelf();
             Logger.LogInfo($"Plugin {PluginInfo.PLUGIN_GUID} is unloaded!");

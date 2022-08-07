@@ -57,7 +57,7 @@ namespace RandomEncounters.Components
             }
             finally
             {
-                var onlineUsersCount = DataFactory.GetOnlineUsersCount(world);
+                var onlineUsersCount = DataFactory.GetOnlineUsersCount();
                 if (_delayAction != null)
                 {
                     _delay = _delayAction.Invoke(onlineUsersCount);
