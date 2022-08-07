@@ -26,8 +26,6 @@ namespace RandomEncounters
         private static float Lifetime => PluginConfig.EncounterLength.Value;
         private static string MessageTemplate => PluginConfig.EncounterMessageTemplate.Value;
 
-        private static Entity test;
-
         public static Random Random = new Random();
 
         internal static void Initialize()
@@ -88,6 +86,7 @@ namespace RandomEncounters
                 //world.EntityManager.SetComponentData(test, GameData.Users.GetUserByPlatformId(user.PlatformId).Internals.LocalToWorld.Value);
                 //world.EntityManager.SetComponentData(test, new UnitSpawnHandler{StationEntity = StationEntity});
 
+                NpcPlayerMap[npc.Id] = user;
                 world.GetExistingSystem<UnitSpawnerUpdateSystem>()
                     .SpawnUnit(StationEntity, new PrefabGUID(npc.Id), user.Position, 1, minSpawnDistance, maxSpawnDistance, Lifetime);
             }
@@ -96,7 +95,6 @@ namespace RandomEncounters
                 Plugin.Logger.LogError(ex);
                 // Suppress
             }
-            NpcPlayerMap[npc.Id] = user;
             //TaskRunner.Start(taskWorld => AfterSpawn(user.PlatformId, taskWorld, npc), TimeSpan.FromMilliseconds(1000));
         }
 
@@ -129,36 +127,7 @@ namespace RandomEncounters
                 return;
             }
 
-            var foundEntity = entity;
-
-            var testComponentTypes = new HashSet<string>();
-            var testComponents = world.EntityManager.GetComponentTypes(test);
-            foreach (var component in testComponents)
-            {
-                testComponentTypes.Add(component.GetManagedType().FullName);
-            }
-
-            var foundComponentTypes = new HashSet<string>();
-            var foundComponents = world.EntityManager.GetComponentTypes(foundEntity);
-            foreach (var component in foundComponents)
-            {
-                foundComponentTypes.Add(component.GetManagedType().FullName);
-            }
-
-            var missingInTest = foundComponentTypes.Except(testComponentTypes);
-            var missingInFound = testComponentTypes.Except(foundComponentTypes);
-
-            foreach (var missingComponent in missingInTest)
-            {
-                Plugin.Logger.LogWarning(missingComponent);
-            }
-
-            if (world.EntityManager.HasComponent<LocalToWorld>(test))
-            {
-                var localToWorld = world.EntityManager.GetComponentData<LocalToWorld>(test);
-                Plugin.Logger.LogWarning($"Test at {localToWorld.Position.x} {localToWorld.Position.z}");
-            }
-
+            NpcPlayerMap.TryRemove(prefabGuid.GuidHash, out _);
 
             if (!RewardsMap.ContainsKey(user.PlatformId))
             {
@@ -180,7 +149,7 @@ namespace RandomEncounters
                     onlineAdmin.SendSystemMessage($"Encounter started: {user.CharacterName} vs. {npcData.Name}");
                 }
             }
-            RewardsMap[user.PlatformId][foundEntity.Index] = DataFactory.GetRandomItem();
+            RewardsMap[user.PlatformId][entity.Index] = DataFactory.GetRandomItem();
         }
 
         private static void ServerEvents_OnDeath(DeathEventListenerSystem sender, NativeArray<DeathEvent> deathEvents)
