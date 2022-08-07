@@ -1,15 +1,28 @@
-﻿using BepInEx.Logging;
+﻿using System;
+using BepInEx.Logging;
 
 namespace RandomEncounters.Utils
 {
-    internal static class Logger
+    internal class Logger
     {
-        internal static void LogInfo(object data) => Plugin.Logger.LogInfo(data);
-        internal static void LogWarning(object data) => Plugin.Logger.LogWarning(data);
-        internal static void Log(LogLevel logLevel, object data) => Plugin.Logger.Log(logLevel, data);
-        internal static void LogDebug(object data) => Plugin.Logger.LogDebug(data);
-        internal static void LogFatal(object data) => Plugin.Logger.LogFatal(data);
-        internal static void LogError(object data) => Plugin.Logger.LogError(data);
-        internal static void LogMessage(object data) => Plugin.Logger.LogMessage(data);
+        private readonly ManualLogSource _logger;
+
+        internal Logger(ManualLogSource logger)
+        {
+            _logger = logger;
+        }
+
+        internal void Log(LogLevel logLevel, string message)
+        {
+            _logger.Log(logLevel, $"[{Plugin.PluginVersion}] {message}");
+        }
+
+        internal void LogInfo(string message) => Log(LogLevel.Info, message);
+        internal void LogWarning(string message) =>  Log(LogLevel.Warning, message);
+        internal void LogDebug(string message) =>  Log(LogLevel.Debug, message);
+        internal void LogFatal(string message) =>  Log(LogLevel.Fatal, message);
+        internal void LogError(string message) =>  Log(LogLevel.Error, message);
+        internal void LogError(Exception exception) =>  Log(LogLevel.Error, exception.ToString());
+        internal void LogMessage(string message) =>  Log(LogLevel.Message, message);
     }
 }

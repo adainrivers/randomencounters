@@ -28,7 +28,7 @@ namespace RandomEncounters.Utils
         {
             var lowestLevel = playerLevel - PluginConfig.EncounterMaxLevelDifferenceLower.Value;
             var highestLevel = playerLevel + PluginConfig.EncounterMaxLevelDifferenceUpper.Value;
-            Logger.LogInfo($"Searching an NPC between levels {lowestLevel} and {highestLevel}");
+            Plugin.Logger.LogInfo($"Searching an NPC between levels {lowestLevel} and {highestLevel}");
             return _npcs
                 .Where(n => PluginConfig.Npcs.TryGetValue(n.Id, out var npcSetting) && npcSetting.Value && n.Level >= lowestLevel && n.Level <= highestLevel).ToList()
                 .GetRandomItem();

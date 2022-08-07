@@ -13,6 +13,7 @@ using VRising.GameData;
 using VRising.GameData.Methods;
 using Wetstone.API;
 using Wetstone.Hooks;
+using Logger = RandomEncounters.Utils.Logger;
 
 namespace RandomEncounters
 {
@@ -22,9 +23,9 @@ namespace RandomEncounters
     {
         public const string PluginGuid = "gamingtools.RandomEncounters";
         public const string PluginName = "RandomEncounters";
-        public const string PluginVersion = "0.8.0";
+        public const string PluginVersion = "0.8.2";
 
-        internal static ManualLogSource Logger { get; private set; }
+        internal static Logger Logger { get; private set; }
         internal static Plugin Instance { get; private set; }
 
         private static Harmony _harmonyInstance;
@@ -33,7 +34,7 @@ namespace RandomEncounters
         public override void Load()
         {
             Instance = this;
-            Logger = Log;
+            Logger = new Logger(Log);
 
             // Plugin startup logic
             Logger.LogInfo($"Plugin {PluginInfo.PLUGIN_GUID} is loaded!");

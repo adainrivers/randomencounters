@@ -8,6 +8,10 @@ It can be configured using the configuration files which are created on first ru
 
 ## Change Log
 
+### 0.8.2
+
+- Logging improvements.
+
 ### 0.8.1
 
 - Fixed an issue which was causing spawned NPC not being detected.

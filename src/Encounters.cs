@@ -61,17 +61,17 @@ namespace RandomEncounters
 
             if (user == null)
             {
-                Logger.LogMessage("Could not find any eligible players for a random encounter...");
+                Plugin.Logger.LogMessage("Could not find any eligible players for a random encounter...");
                 return;
             }
 
             var npc = DataFactory.GetRandomNpc(user.Character.Equipment.Level);
             if (npc == null)
             {
-                Logger.LogWarning($"Could not find any NPCs within the given level range. (User Level: {user.Character.Equipment.Level})");
+                Plugin.Logger.LogWarning($"Could not find any NPCs within the given level range. (User Level: {user.Character.Equipment.Level})");
                 return;
             }
-            Logger.LogMessage($"Attempting to start a new encounter for {user.CharacterName} with {npc.Name}");
+            Plugin.Logger.LogMessage($"Attempting to start a new encounter for {user.CharacterName} with {npc.Name}");
             var minSpawnDistance = PluginConfig.MinSpawnDistance.Value;
             var maxSpawnDistance = PluginConfig.MaxSpawnDistance.Value;
             try
@@ -139,7 +139,7 @@ namespace RandomEncounters
                     npcData.Name, Lifetime);
 
             user.SendSystemMessage(message);
-            Logger.LogInfo($"Encounters started: {user.CharacterName} vs. {npcData.Name}");
+            Plugin.Logger.LogInfo($"Encounters started: {user.CharacterName} vs. {npcData.Name}");
 
             if (PluginConfig.NotifyAdminsAboutEncountersAndRewards.Value)
             {
@@ -177,7 +177,7 @@ namespace RandomEncounters
                     var message = string.Format(PluginConfig.RewardMessageTemplate.Value, itemModel.Color, itemModel.Name);
                     userModel.SendSystemMessage(message);
                     bounties.TryRemove(deathEvent.Died.Index, out _);
-                    Logger.LogInfo($"{userModel.CharacterName} earned reward: {itemModel.Name}");
+                    Plugin.Logger.LogInfo($"{userModel.CharacterName} earned reward: {itemModel.Name}");
                     var globalMessage = string.Format(PluginConfig.RewardAnnouncementMessageTemplate.Value,
                         userModel.CharacterName, itemModel.Color, itemModel.Name);
                     if (PluginConfig.NotifyAllPlayersAboutRewards.Value)

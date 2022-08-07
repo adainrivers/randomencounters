@@ -48,12 +48,12 @@ namespace RandomEncounters.Components
             _isRunning = true;
             try
             {
-                Logger.LogDebug("Executing timer.");
+                Plugin.Logger.LogDebug("Executing timer.");
                 _action.Invoke(world);
             }
             catch (Exception ex)
             {
-                Logger.LogError(ex);
+                Plugin.Logger.LogError(ex);
             }
             finally
             {
