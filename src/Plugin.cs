@@ -2,16 +2,14 @@
 using System.Linq;
 using BepInEx;
 using BepInEx.IL2CPP;
-using BepInEx.Logging;
 using HarmonyLib;
-using ProjectM;
 using RandomEncounters.Components;
 using RandomEncounters.Configuration;
 using RandomEncounters.Patch;
 using RandomEncounters.Utils;
+using Unity.Entities;
 using VRising.GameData;
 using VRising.GameData.Methods;
-using Wetstone.API;
 using Wetstone.Hooks;
 using Logger = RandomEncounters.Utils.Logger;
 
@@ -19,7 +17,8 @@ namespace RandomEncounters
 {
     [BepInPlugin(PluginGuid, PluginName, PluginVersion)]
     [BepInDependency("xyz.molenzwiebel.wetstone")]
-    public class Plugin : BasePlugin, IRunOnInitialized
+    [BepInDependency("VRising.GameData")]
+    public class Plugin : BasePlugin
     {
         public const string PluginGuid = "gamingtools.RandomEncounters";
         public const string PluginName = "RandomEncounters";
@@ -33,41 +32,43 @@ namespace RandomEncounters
 
         public override void Load()
         {
+            if (GameData.IsClient)
+            {
+                Logger.LogError($"{PluginName} is only compatible with V Rising Server.");
+                return;
+            }
             Instance = this;
             Logger = new Logger(Log);
 
             // Plugin startup logic
-            Logger.LogInfo($"Plugin {PluginInfo.PLUGIN_GUID} is loaded!");
             _harmonyInstance = new Harmony(PluginInfo.PLUGIN_GUID);
             _harmonyInstance.PatchAll(typeof(ServerEvents));
 
             Chat.OnChatMessage += Chat_OnChatMessage;
-            ServerEvents.OnServerStartupStateChanged += ServerEvents_OnServerStartupStateChanged;
+            GameData.OnInitialize += GameData_OnInitialize;
+            Logger.LogInfo($"Plugin {PluginInfo.PLUGIN_GUID} is loaded!");
         }
 
-        private void ServerEvents_OnServerStartupStateChanged(LoadPersistenceSystemV2 sender, ServerStartupState.State serverStartupState)
+        private static void GameData_OnInitialize(World world)
         {
-            if (serverStartupState == ServerStartupState.State.SuccessfulStartup)
+            Logger.LogInfo("Loading main data");
+            DataFactory.Initialize();
+            Logger.LogInfo("Binding configuration");
+            PluginConfig.Initialize();
+
+            Encounters.Initialize();
+
+            _encounterTimer = new Timer();
+            if (PluginConfig.Enabled.Value)
             {
-                Logger.LogDebug("Loading main data");
-                DataFactory.Initialize();
-                Logger.LogDebug("Binding configuration");
-                PluginConfig.Initialize();
-
-                Encounters.Initialize();
-
-                _encounterTimer = new Timer();
-                if (PluginConfig.Enabled.Value)
-                {
-                    StartEncounterTimer();
-                }
+                StartEncounterTimer();
             }
         }
 
         private static void StartEncounterTimer()
         {
             _encounterTimer.Start(
-                world =>
+                _ =>
                 {
                     Logger.LogInfo("Starting an encounter.");
                     Encounters.StartEncounter();
@@ -102,7 +103,7 @@ namespace RandomEncounters
                 return;
             }
 
-            var senderModel = GameData.Users.GetUserFromEntity(e.SenderUserEntity);
+            var senderModel = GameData.Users.FromEntity(e.SenderUserEntity);
             var command = message.Replace("!re", string.Empty).Replace("!randomencounter", string.Empty);
             switch (command)
             {
@@ -155,7 +156,7 @@ namespace RandomEncounters
                     }
 
                     command = command.Trim();
-                    var onlineUsers = GameData.Users.GetOnlineUsers();
+                    var onlineUsers = GameData.Users.Online;
                     var foundUser = onlineUsers.FirstOrDefault(u =>
                         u.CharacterName.Equals(command, StringComparison.OrdinalIgnoreCase));
 
@@ -173,7 +174,7 @@ namespace RandomEncounters
 
         public override bool Unload()
         {
-            ServerEvents.OnServerStartupStateChanged -= ServerEvents_OnServerStartupStateChanged;
+            GameData.OnInitialize -= GameData_OnInitialize;
             Chat.OnChatMessage-= Chat_OnChatMessage;
             Config.Clear();
             _encounterTimer?.Stop();
@@ -183,9 +184,6 @@ namespace RandomEncounters
             return true;
         }
 
-        public void OnGameInitialized()
-        {
-            GameData.Initialize();
-        }
+
     }
 }

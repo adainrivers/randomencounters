@@ -46,7 +46,7 @@ namespace RandomEncounters
 
             if (user == null)
             {
-                var users = GameData.Users.GetOnlineUsers();
+                var users = GameData.Users.Online;
                 if (PluginConfig.SkipPlayersInCastle.Value)
                 {
                     users = users.Where(u => !u.IsInCastle());
@@ -162,7 +162,7 @@ namespace RandomEncounters
                 }
 
                 var playerCharacter = sender.EntityManager.GetComponentData<PlayerCharacter>(deathEvent.Killer);
-                var userModel = GameData.Users.GetUserFromEntity(playerCharacter.UserEntity._Entity);
+                var userModel = GameData.Users.FromEntity(playerCharacter.UserEntity._Entity);
 
 
                 if (RewardsMap.TryGetValue(userModel.PlatformId, out var bounties) &&
@@ -182,7 +182,7 @@ namespace RandomEncounters
                         userModel.CharacterName, itemModel.Color, itemModel.Name);
                     if (PluginConfig.NotifyAllPlayersAboutRewards.Value)
                     {
-                        var onlineUsers = GameData.Users.GetOnlineUsers();
+                        var onlineUsers = GameData.Users.Online;
                         foreach (var model in onlineUsers.Where(u => u.PlatformId != userModel.PlatformId))
                         {
                             model.SendSystemMessage(globalMessage);

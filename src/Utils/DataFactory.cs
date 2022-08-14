@@ -43,7 +43,7 @@ namespace RandomEncounters.Utils
 
         internal static int GetOnlineUsersCount()
         {
-            return GameData.Users.GetOnlineUsers().Count();
+            return GameData.Users.Online.Count();
         }
 
         internal static List<ItemDataModel> GetAllItems()
@@ -58,7 +58,7 @@ namespace RandomEncounters.Utils
 
         internal static List<UserModel> GetOnlineAdmins(World world)
         {
-            return GameData.Users.GetOnlineUsers().Where(u => u.IsAdmin).ToList();
+            return GameData.Users.Online.Where(u => u.IsAdmin).ToList();
         }
 
         private static T GetRandomItem<T>(this List<T> items)

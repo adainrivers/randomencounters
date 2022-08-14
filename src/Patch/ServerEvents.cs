@@ -3,35 +3,18 @@ using HarmonyLib;
 using ProjectM;
 using Unity.Collections;
 using Unity.Entities;
-using UnityEngine;
 
 namespace RandomEncounters.Patch
 {
     public delegate void OnUpdateEventHandler(World world);
     public delegate void OnUnitSpawnedEventHandler(World world, Entity entity);
-    public delegate void ServerStartupStateChangeEventHandler(LoadPersistenceSystemV2 sender, ServerStartupState.State serverStartupState);
     public delegate void DeathEventHandler(DeathEventListenerSystem sender, NativeArray<DeathEvent> deathEvents);
 
     public static class ServerEvents
     {
         public static event OnUpdateEventHandler OnUpdate;
         public static event DeathEventHandler OnDeath;
-        public static event ServerStartupStateChangeEventHandler OnServerStartupStateChanged;
         public static event OnUnitSpawnedEventHandler OnUnitSpawned;
-
-        [HarmonyPatch(typeof(LoadPersistenceSystemV2), nameof(LoadPersistenceSystemV2.SetLoadState))]
-        [HarmonyPrefix]
-        private static void ServerStartupStateChange_Prefix(ServerStartupState.State loadState, LoadPersistenceSystemV2 __instance)
-        {
-            try
-            {
-                OnServerStartupStateChanged?.Invoke(__instance, loadState);
-            }
-            catch (Exception e)
-            {
-                Plugin.Logger.LogError(e);
-            }
-        }
 
         [HarmonyPatch(typeof(ServerTimeSystem_Server), nameof(ServerTimeSystem_Server.OnUpdate))]
         [HarmonyPostfix]

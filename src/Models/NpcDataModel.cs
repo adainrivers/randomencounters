@@ -39,7 +39,7 @@ namespace RandomEncounters.Models
             try
             {
                 var npcEntity = prefabCollectionSystem.PrefabLookupMap[new PrefabGUID(Id)];
-                return GameData.Npcs.GetNpcFromEntity(npcEntity);
+                return GameData.Npcs.FromEntity(npcEntity);
             }
             catch
             {
