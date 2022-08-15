@@ -8,6 +8,11 @@ It can be configured using the configuration files which are created on first ru
 
 ## Change Log
 
+### 0.8.3
+
+- Fixed an issue with InCombat detection.
+- Mod now depends on https://v-rising.thunderstore.io/package/adainrivers/GT_VRising_GameData/
+
 ### 0.8.2
 
 - Logging improvements.

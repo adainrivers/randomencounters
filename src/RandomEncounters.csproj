@@ -4,7 +4,7 @@
     <TargetFramework>netstandard2.1</TargetFramework>
     <AssemblyName>RandomEncounters</AssemblyName>
     <Description>A server side mod for V Rising which spawns a random NPC near a random online player at random intervals, and the player wins a random item reward if the NPC is killed within the given time limit.</Description>
-    <Version>0.8.2</Version>
+    <Version>0.8.3</Version>
     <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
     <LangVersion>latest</LangVersion>
     <RestoreSources>
@@ -33,7 +33,7 @@
   </Target>
 
   <ItemGroup>
-    <ProjectReference Include="..\..\VRising.GameData\src\VRising.GameData\VRising.GameData.csproj" />
+    <ProjectReference Include="..\..\VRising.GameData\src\VRising.GameData\GT.VRising.GameData.csproj" />
   </ItemGroup>
 
   <ItemGroup>

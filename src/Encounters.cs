@@ -1,6 +1,5 @@
 ﻿using System;
 using System.Collections.Concurrent;
-using System.Collections.Generic;
 using System.Linq;
 using ProjectM;
 using RandomEncounters.Configuration;
@@ -9,11 +8,9 @@ using RandomEncounters.Patch;
 using RandomEncounters.Utils;
 using Unity.Collections;
 using Unity.Entities;
-using Unity.Transforms;
-using VRising.GameData;
-using VRising.GameData.Methods;
-using VRising.GameData.Models;
-using VRising.GameData.Utils;
+using GT.VRising.GameData;
+using GT.VRising.GameData.Methods;
+using GT.VRising.GameData.Models;
 
 namespace RandomEncounters
 {

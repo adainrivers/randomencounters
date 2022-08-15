@@ -1,7 +1,7 @@
 ﻿using System;
 using ProjectM;
-using VRising.GameData;
-using VRising.GameData.Models;
+using GT.VRising.GameData;
+using GT.VRising.GameData.Models;
 using Wetstone.API;
 
 namespace RandomEncounters.Models
