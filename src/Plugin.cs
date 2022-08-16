@@ -46,6 +46,7 @@ namespace RandomEncounters
 
             Chat.OnChatMessage += Chat_OnChatMessage;
             GameData.OnInitialize += GameData_OnInitialize;
+            GameFrame.Initialize();
             Logger.LogInfo($"Plugin {PluginInfo.PLUGIN_GUID} is loaded!");
         }
 
@@ -179,6 +180,7 @@ namespace RandomEncounters
             Config.Clear();
             _encounterTimer?.Stop();
             Encounters.Destroy();
+            GameFrame.Uninitialize();
             _harmonyInstance?.UnpatchSelf();
             Logger.LogInfo($"Plugin {PluginInfo.PLUGIN_GUID} is unloaded!");
             return true;

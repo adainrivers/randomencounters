@@ -8,6 +8,10 @@ It can be configured using the configuration files which are created on first ru
 
 ## Change Log
 
+### 0.8.4
+
+- NPCs should no longer spawn in object anymore (Well, much less frequently anyway).
+
 ### 0.8.3
 
 - Fixed an issue with InCombat detection.

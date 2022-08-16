@@ -1,4 +1,5 @@
 ﻿using System;
+using GT.VRising.GameData;
 using RandomEncounters.Patch;
 using RandomEncounters.Utils;
 using Unity.Entities;
@@ -20,8 +21,9 @@ namespace RandomEncounters.Components
             _lastRunTime = DateTime.UtcNow - delay;
             _action = action;
             _enabled = true;
-            ServerEvents.OnUpdate += Update;
+            GameFrame.OnUpdate += GameFrame_OnUpdate;
         }
+
 
         public void Start(Action<World> action, Func<object, TimeSpan> delayAction)
         {
@@ -30,9 +32,13 @@ namespace RandomEncounters.Components
             _lastRunTime = DateTime.UtcNow;
             _action = action;
             _enabled = true;
-            ServerEvents.OnUpdate += Update;
+            GameFrame.OnUpdate += GameFrame_OnUpdate;
         }
 
+        private void GameFrame_OnUpdate()
+        {
+            Update(GameData.World);
+        }
         private void Update(World world)
         {
             if (!_enabled || _isRunning)
@@ -69,7 +75,7 @@ namespace RandomEncounters.Components
 
         public void Stop()
         {
-            ServerEvents.OnUpdate -= Update;
+            GameFrame.OnUpdate -= GameFrame_OnUpdate;
             _enabled = false;
         }
 

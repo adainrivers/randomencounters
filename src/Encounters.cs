@@ -84,8 +84,11 @@ namespace RandomEncounters
                 //world.EntityManager.SetComponentData(test, new UnitSpawnHandler{StationEntity = StationEntity});
 
                 NpcPlayerMap[npc.Id] = user;
+
+                var spawnPosition =
+                    PositioningHelpers.GetSpawnPosition(user.Position, minSpawnDistance, maxSpawnDistance);
                 world.GetExistingSystem<UnitSpawnerUpdateSystem>()
-                    .SpawnUnit(StationEntity, new PrefabGUID(npc.Id), user.Position, 1, minSpawnDistance, maxSpawnDistance, Lifetime);
+                    .SpawnUnit(StationEntity, new PrefabGUID(npc.Id), spawnPosition, 1, 1, 1, Lifetime);
             }
             catch(Exception ex)
             {
