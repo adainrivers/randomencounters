@@ -19,7 +19,7 @@ namespace RandomEncounters.Utils
         internal static void Initialize()
         {
             var tsv = Encoding.UTF8.GetString(PluginResources.npcs);
-            _npcs = tsv.Split("\r\n", StringSplitOptions.RemoveEmptyEntries).Select(l => new NpcDataModel(l)).Where(n => n.NpcModel != null && n.NpcModel.HasDropTable).ToList();
+            _npcs = tsv.Split("\r\n", StringSplitOptions.RemoveEmptyEntries).Select(l => new NpcDataModel(l)).Where(n => n.NpcModel != null && n.NpcModel.HasDropTable && !n.PrefabName.Contains("summon", StringComparison.OrdinalIgnoreCase)).ToList();
             tsv = Encoding.UTF8.GetString(PluginResources.items);
             _items = tsv.Split("\r\n", StringSplitOptions.RemoveEmptyEntries).Select(l => new ItemDataModel(l)).ToList();
         }
