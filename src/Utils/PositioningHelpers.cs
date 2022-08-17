@@ -1,11 +1,9 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Text;
-using GT.VRising.GameData;
 using ProjectM.Terrain;
 using ProjectM.Tiles;
 using Unity.Mathematics;
 using UnityEngine;
+using VRising.GameData;
 using Random = System.Random;
 
 namespace RandomEncounters.Utils
@@ -13,7 +11,7 @@ namespace RandomEncounters.Utils
     // Credit: https://github.com/AviiNL/vrising-troublemaker
     internal class PositioningHelpers
     {
-        private static Random _random = new Random();
+        private static readonly Random _random = new ();
         private static TileMapCollisionMath.MapData _mapDataValue;
         private static TileMapCollisionMath.MapData MapData
         {

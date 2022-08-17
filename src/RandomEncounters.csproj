@@ -4,7 +4,7 @@
     <TargetFramework>netstandard2.1</TargetFramework>
     <AssemblyName>RandomEncounters</AssemblyName>
     <Description>A server side mod for V Rising which spawns a random NPC near a random online player at random intervals, and the player wins a random item reward if the NPC is killed within the given time limit.</Description>
-    <Version>0.8.4</Version>
+    <Version>0.8.5</Version>
     <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
     <LangVersion>latest</LangVersion>
     <RestoreSources>
@@ -12,6 +12,7 @@
       https://nuget.bepinex.dev/v3/index.json;
     </RestoreSources>
     <ServerPath>D:\SteamLibrary\steamapps\common\VRising\VRising_Server</ServerPath>
+    <CopyLocalLockFileAssemblies>true</CopyLocalLockFileAssemblies>
   </PropertyGroup>
 
   <ItemGroup>
@@ -19,6 +20,10 @@
     <PackageReference Include="BepInEx.PluginInfoProps" Version="1.*" />
     <PackageReference Include="VRising.Unhollowed.Client" Version="0.5.*" />
     <PackageReference Include="Wetstone" Version="1.1.0" />
+    <PackageReference Include="Fody" Version="6.6.3">
+      <PrivateAssets>all</PrivateAssets>
+    </PackageReference>
+    <PackageReference Include="ILMerge.Fody" Version="1.23.0" />
   </ItemGroup>
 
   <Target Name="CopyDLLs" AfterTargets="Build">
@@ -28,7 +33,7 @@
   </Target>
 
   <ItemGroup>
-    <ProjectReference Include="..\..\VRising.GameData\src\VRising.GameData\GT.VRising.GameData.csproj" />
+    <ProjectReference Include="..\..\VRising.GameData\src\VRising.GameData\VRising.GameData.csproj" />
   </ItemGroup>
 
   <ItemGroup>

@@ -8,6 +8,10 @@ It can be configured using the configuration files which are created on first ru
 
 ## Change Log
 
+### 0.8.5
+
+- Removed the additional dependency to GT_VRising_GameData. It is now an embedded library.
+
 ### 0.8.4
 
 - NPCs should no longer spawn in object anymore (Well, much less frequently anyway).

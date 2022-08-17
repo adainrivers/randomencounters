@@ -8,9 +8,9 @@ using RandomEncounters.Patch;
 using RandomEncounters.Utils;
 using Unity.Collections;
 using Unity.Entities;
-using GT.VRising.GameData;
-using GT.VRising.GameData.Methods;
-using GT.VRising.GameData.Models;
+using VRising.GameData;
+using VRising.GameData.Methods;
+using VRising.GameData.Models;
 
 namespace RandomEncounters
 {

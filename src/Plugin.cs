@@ -8,8 +8,8 @@ using RandomEncounters.Configuration;
 using RandomEncounters.Patch;
 using RandomEncounters.Utils;
 using Unity.Entities;
-using GT.VRising.GameData;
-using GT.VRising.GameData.Methods;
+using VRising.GameData;
+using VRising.GameData.Methods;
 using Wetstone.Hooks;
 using Logger = RandomEncounters.Utils.Logger;
 
@@ -17,12 +17,11 @@ namespace RandomEncounters
 {
     [BepInPlugin(PluginGuid, PluginName, PluginVersion)]
     [BepInDependency("xyz.molenzwiebel.wetstone")]
-    [BepInDependency("GT.VRising.GameData")]
     public class Plugin : BasePlugin
     {
         public const string PluginGuid = "gamingtools.RandomEncounters";
         public const string PluginName = "RandomEncounters";
-        public const string PluginVersion = "0.8.3";
+        public const string PluginVersion = PluginInfo.PLUGIN_VERSION;
 
         internal static Logger Logger { get; private set; }
         internal static Plugin Instance { get; private set; }

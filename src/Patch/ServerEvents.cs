@@ -6,30 +6,13 @@ using Unity.Entities;
 
 namespace RandomEncounters.Patch
 {
-    public delegate void OnUpdateEventHandler(World world);
     public delegate void OnUnitSpawnedEventHandler(World world, Entity entity);
     public delegate void DeathEventHandler(DeathEventListenerSystem sender, NativeArray<DeathEvent> deathEvents);
 
     public static class ServerEvents
     {
-        public static event OnUpdateEventHandler OnUpdate;
         public static event DeathEventHandler OnDeath;
         public static event OnUnitSpawnedEventHandler OnUnitSpawned;
-
-        [HarmonyPatch(typeof(ServerTimeSystem_Server), nameof(ServerTimeSystem_Server.OnUpdate))]
-        [HarmonyPostfix]
-        private static void ServerTimeSystemOnUpdate_Postfix(ServerTimeSystem_Server __instance)
-        {
-            try
-            {
-                OnUpdate?.Invoke(__instance.World);
-            }
-            catch (Exception e)
-            {
-                Plugin.Logger.LogError(e);
-            }
-        }
-
 
         [HarmonyPatch(typeof(DeathEventListenerSystem), nameof(DeathEventListenerSystem.OnUpdate))]
         [HarmonyPostfix]

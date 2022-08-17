@@ -5,8 +5,8 @@ using System.Text;
 using RandomEncounters.Configuration;
 using RandomEncounters.Models;
 using Unity.Entities;
-using GT.VRising.GameData;
-using GT.VRising.GameData.Models;
+using VRising.GameData;
+using VRising.GameData.Models;
 
 namespace RandomEncounters.Utils
 {

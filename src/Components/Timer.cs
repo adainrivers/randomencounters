@@ -1,8 +1,7 @@
 ﻿using System;
-using GT.VRising.GameData;
-using RandomEncounters.Patch;
 using RandomEncounters.Utils;
 using Unity.Entities;
+using VRising.GameData;
 
 namespace RandomEncounters.Components
 {
