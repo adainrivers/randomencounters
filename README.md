@@ -2,6 +2,8 @@
 
 See [V Rising Database](https://risingdb.com) for detailed information about V Rising items, NPCs and more.
 
+Also see  [Palia Database](https://paliapedia.com) for everything you need to know about Palia.
+
 This server side mod spawns a random NPC near a random online player at random intervals, and the player wins a random item reward if the NPC is killed within the given time limit.
 
 It can be configured using the configuration files which are created on first run.
