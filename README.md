@@ -110,10 +110,6 @@ Version 3.1.0 targets the current V Rising 1.1 server line. It requires VampireC
 - Initial public release of the mod
 </details>
 
-# Support this project
-
-[![ko-fi](https://ko-fi.com/img/githubbutton_sm.svg)](https://ko-fi.com/K3K8ENRQY)
-
 ## Mod Features
 BloodyEncounters elevates gameplay by injecting an element of unpredictability and formidable challenges. As players venture outside their castles, there's a chance a random NPC will spawn nearby. You can customize the NPC level difference, ensuring balanced encounters for all players. This mod is highly configurable, offering an array of options to tailor the experience to your preferences.
 
