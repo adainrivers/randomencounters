@@ -1,0 +1,27 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+  <PropertyGroup>
+    <TargetFramework>net6.0</TargetFramework>
+    <AssemblyName>BloodyEncounters</AssemblyName>
+    <Description>A server side mod for V Rising which spawns a random NPC near a random online player at random intervals, and the player wins a random item reward if the NPC is killed within the given time limit.</Description>
+    <Version>3.1.0</Version>
+    <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
+    <LangVersion>latest</LangVersion>
+    <RootNamespace>BloodyEncounters</RootNamespace>
+    <CopyLocalLockFileAssemblies>true</CopyLocalLockFileAssemblies>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <!-- V Rising 1.1: BepInEx moved to be.733, Unhollowed to 1.1.x, BloodyCore to 2.0.x. -->
+    <!-- VRising.Bloodstone removed entirely - abandoned, and BloodyCore already -->
+    <!-- provides the world + init callback this mod actually uses. -->
+    <PackageReference Include="BepInEx.Unity.IL2CPP" Version="6.0.0-be.733" IncludeAssets="compile" />
+    <PackageReference Include="BepInEx.Core" Version="6.0.0-be.733" IncludeAssets="compile" />
+    <PackageReference Include="BepInEx.PluginInfoProps" Version="2.*" />
+    <PackageReference Include="VRising.Unhollowed.Client" Version="1.1.*" />
+    <PackageReference Include="VRising.VampireCommandFramework" Version="0.*" />
+    <PackageReference Include="Bloody.Core" Version="2.0.*" />
+  </ItemGroup>
+
+  <!-- CopyDLLsServer target removed: it pointed at a hardcoded Steam path -->
+  <!-- that only existed on the original author's machine. -->
+</Project>

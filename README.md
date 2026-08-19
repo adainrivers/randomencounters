@@ -1,170 +1,216 @@
-# Random Encounters mod for V Rising
+# BloodyEncounters
 
-See [V Rising Database](https://risingdb.com) for detailed information about V Rising items, NPCs and more.
+**BloodyEncounters** represents an enhanced iteration of the RandonmEncounters mod by [@adainrivers](https://github.com/adainrivers), functioning as a server-side mod that introduces a thrilling dynamic to gameplay. It randomly spawns NPCs near online players at unpredictable intervals, challenging players to defeat these NPCs within a set time limit to earn random item rewards.
 
-Also see  [Palia Database](https://paliapedia.com) for everything you need to know about Palia.
+## IMPORTANT NOTE
 
-This server side mod spawns a random NPC near a random online player at random intervals, and the player wins a random item reward if the NPC is killed within the given time limit.
+Version 3.1.0 targets the current V Rising 1.1 server line. It requires VampireCommandFramework 0.11.0 and Bloody.Core 2.0.2. Bloodstone is no longer required.
 
-It can be configured using the configuration files which are created on first run.
+## NEW IN 3.0.0
 
-## Change Log
+- Complete refactoring of the mod.
+- Added the functionality that if an NPC has the group value filled, it spawns all the NPCs in that group.
+- Added the ability to modify npc statistics.
 
-### 0.8.6
 
-- Excluded some NPCs which are summoned by other NPCs.
+```json
+[
+ {
+    "name": "Rifle Man",
+    "PrefabGUID": 1148936156,
+    "AssetName": "CHAR_ChurchOfLight_Rifleman",
+    "levelAbove": 10,
+    "items": [
+      {
+        "name": "Blood Rose Potion",
+        "ItemID": 429052660,
+        "Stack": 25,
+        "Chance": 1,
+        "Color": "#daa520"
+      },
+      {
+        "name": "Blood Token",
+        "ItemID": -77477508,
+        "Stack": 10,
+        "Chance": 1,
+        "Color": "#daa520"
+      }
+    ],
+    "Lifetime": 300,
+    "Group": "Uno",
+    "unitStats": {
+      "PhysicalCriticalStrikeChance": 0,
+      "PhysicalCriticalStrikeDamage": 2,
+      "SpellCriticalStrikeChance": 0,
+      "SpellCriticalStrikeDamage": 2,
+      "PhysicalPower": 45.550457,
+      "SpellPower": 45.550457,
+      "ResourcePower": 28.449999,
+      "SiegePower": 17,
+      "ResourceYieldModifier": 1,
+      "ReducedResourceDurabilityLoss": 1,
+      "PhysicalResistance": 0,
+      "SpellResistance": 0,
+      "SunResistance": 0,
+      "FireResistance": 0,
+      "HolyResistance": 0,
+      "SilverResistance": 0,
+      "SilverCoinResistance": 0,
+      "GarlicResistance": 0,
+      "PassiveHealthRegen": 1,
+      "CCReduction": 0,
+      "HealthRecovery": 1,
+      "DamageReduction": 0,
+      "HealingReceived": 0,
+      "ShieldAbsorbModifier": 1,
+      "BloodEfficiency": 1
+    }
+  }
+]
+```
 
-### 0.8.5
+<details>
+<summary>Changelog</summary>
 
-- Removed the additional dependency to GT_VRising_GameData. It is now an embedded library.
+`3.0.0`
+- Complete refactoring of the mod
+- Added an optional extar parameter called "group" to the NPC add command
+- Added option in the mod configuration for the default message of the groups
+- Added the functionality that if an NPC has the group value filled, it spawns all the NPCs in that group.
+- Added the ability to modify npc statistics.
+- Fixed bug that caused all npcs like those configured in the mod to drop the configured items when they were not part of the encounter
 
-### 0.8.4
+`2.0.8`
+- Fixed reload command
 
-- NPCs should no longer spawn in object anymore (Well, much less frequently anyway).
+`2.0.5`
+- Updated the timer system through Coroutine that brings the new version of Bloody.Core
+- Removed the original Drop Table from every NPC you set up.
+- Removed the ability to unlock Trophies by killing a VBlood that you set up for encounters.
+- Eliminate the possibility of tracking VBlood in case they are configured for meetings
 
-### 0.8.3
+`2.0.4`
+- Update Timer Systems
 
-- Fixed an issue with InCombat detection.
-- Mod now depends on https://v-rising.thunderstore.io/package/adainrivers/GT_VRising_GameData/
+`2.0.4`
+- Bloody.Core dependency removed as dll and added as frameworkrk
 
-### 0.8.2
+`2.0.3`
+- Fixed the bug that the encounter spawn had. A new spawn system has been generated to avoid incompatibilities with other mods
+- Fixed bug that caused the BloodyEncounter reward system and death message to also affect the game's default NPC if the NPC Prefab was configured as BloodyEncounter.
 
-- Logging improvements.
+`2.0.0`
+- World boss functionality has been removed to create a standalone mod called [BloodyBoss](https://github.com/oscarpedrero/BloodyBoss)
+- Updated to a VRising 1.0
 
-### 0.8.1
+`1.5.0`
+- Added World Boss
 
-- Fixed an issue which was causing spawned NPC not being detected.
+`1.0.0`
+- Initial public release of the mod
+</details>
 
-### 0.8.0
+# Support this project
 
-- Fixed an issue which was causing the server crash.
-- You can now specify the quantities for each item in `Items.cfg`. Unobtainable items are disabled by default.
-- Increased performance for spawn detection.
+[![ko-fi](https://ko-fi.com/img/githubbutton_sm.svg)](https://ko-fi.com/K3K8ENRQY)
 
-### 0.7.1
+## Mod Features
+BloodyEncounters elevates gameplay by injecting an element of unpredictability and formidable challenges. As players venture outside their castles, there's a chance a random NPC will spawn nearby. You can customize the NPC level difference, ensuring balanced encounters for all players. This mod is highly configurable, offering an array of options to tailor the experience to your preferences.
 
-- Fixed an issue which was causing the same player being picked every time.
+## Requirements:
 
-## Source Code
+For the correct functioning of this mod you must have the following dependencies installed on your server:
 
-Source code of this mod can be found at:
-https://github.com/adainrivers/randomencounters
+1. [BepInExPack for V Rising 1.733.2](https://thunderstore.io/c/v-rising/p/BepInEx/BepInExPack_V_Rising/)
+2. [VampireCommandFramework 0.11.0](https://thunderstore.io/c/v-rising/p/deca/VampireCommandFramework/)
+3. [Bloody.Core 2.0.2](https://thunderstore.io/c/v-rising/p/Trodi/BloodyCore/)
+
+Bloodstone is not a dependency of version 3.1.0.
 
 ## Installation
+1. Install the required dependencies on the dedicated server.
+2. Copy `BloodyEncounters.dll` to the server's `BepInEx/plugins` directory.
+3. Launch the server once to generate `BepInEx/config/BloodyEncounters/BloodyEncounters.cfg` and `NPCS.json`.
+4. `NPCS.json` starts empty. Add at least one encounter NPC with `.be npc create` before using `.be me` or automatic encounters.
 
-Random Encounters mod requires Wetstone plugin installed. The latest version of Wetstone can be downloaded from https://v-rising.thunderstore.io/package/molenzwiebel/Wetstone/
+## Commands
+It's crucial to note that for any command containing a name argument such as `<NameOfNPC>`, `<ItemName>` or `<GroupName>`, if your name consists of more than one word, include it inside `""` to ensure proper functionality (e.g., "Rifle Man" or "Blood Rose Potion").
 
-**Since version 0.7.0, the hot reloading feature of Wetstone does NOT work for RandomEncounters. Instead, please use the `!re reload` feature after you make an configuration change.**
-
-## Chat Commands
-
-All chat commands use the default prefix of `!randomencounter` or `!re`. They are only accessible by server admins.
-
-### Commands
-
-`!re start` or just `!re`: Starts an encounter for a random online user.
-
-`!re me`: Starts an encounter for the admin who sends the command.
-
-`!re reload`: Reloads the configuration without restarting the server.
-
-`!re {playerName}`: Starts an encounter for the given player, for example `!re Adain`.
-
-`!re disable`: Disables the random encounter timer.
-
-`!re enabled`: Enables the random encounter timer.
-
-## Configuration files and options:
-
-### Main.cfg
+```ansi
+.be npc create <NameOfNPC> <PrefabGUIDOfNPC> <LevelsAbovePlayer> <LifeTime> <GroupName>
 ```
-[Main]
-
-## Determines whether the random encounter timer is enabled or not.
-# Setting type: Boolean
-# Default value: true
-Enabled = true
-
-## When enabled, players who are in a castle are excluded from encounters
-# Setting type: Boolean
-# Default value: true
-SkipPlayersInCastle = true
-
-## When enabled, players who are in combat are excluded from the random encounters.
-# Setting type: Boolean
-# Default value: false
-SkipPlayersInCombat = false
-
-## Minimum seconds before a new encounter is initiated. This value is divided by the online users count.
-# Setting type: Int32
-# Default value: 1200
-EncounterTimerMin = 1200
-
-## Maximum seconds before a new encounter is initiated. This value is divided by the online users count.
-# Setting type: Int32
-# Default value: 2400
-EncounterTimerMax = 2400
-
-## Maximum seconds until the player can kill the NPC for a reward.
-# Setting type: Int32
-# Default value: 120
-EncounterLength = 120
-
-## The lower value for the NPC level - Player level difference. For example, if player level is 50, and this setting is 20, then the lowest level of the spawned NPC would be 30.
-# Setting type: Int32
-# Default value: 99
-EncounterMinLevelDifference = 99
-
-## The upper value for the NPC level - Player level difference.  For example, if player level is 50, and this setting is 20, then the highest level of the spawned NPC would be 70.
-# Setting type: Int32
-# Default value: 0
-EncounterMaxLevelDifference = 0
-
-## System message template for the encounter.
-# Setting type: String
-# Default value: You have encountered a <color=#daa520>{0}</color>. You have <color=#daa520>{1}</color> seconds to kill it for a chance of a random reward.
-EncounterMessageTemplate = You have encountered a <color=#daa520>{0}</color>. You have <color=#daa520>{1}</color> seconds to kill it for a chance of a random reward.
-
-## System message template for the reward.
-# Setting type: String
-# Default value: Congratulations. Your reward: <color={0}>{1}</color>.
-RewardMessageTemplate = Congratulations. Your reward: <color={0}>{1}</color>.
-
-## System message template for the reward announcement.
-# Setting type: String
-# Default value: {0} earned an encounter reward: <color={1}>{2}</color>.
-RewardAnnouncementMessageTemplate = {0} earned an encounter reward: <color={1}>{2}</color>.
-
-## If enabled, all online admins are notified about encounters and rewards.
-# Setting type: Boolean
-# Default value: true
-NotifyAdminsAboutEncountersAndRewards = true
-
-## When enabled, all online players are notified about any player's rewards.
-# Setting type: Boolean
-# Default value: false
-NotifyAllPlayersAboutRewards = false
-
-## Minimum spawn distance for the spawned unit.
-# Setting type: Int32
-# Default value: 2
-MinSpawnDistance = 2
-
-## Maximum spawn distance for the spawned unit.
-# Setting type: Int32
-# Default value: 4
-MaxSpawnDistance = 4
-
-
+- Create your desired NPCs to include in the encounter randomized pool.
+  - **NameOfNPC**: The NPC name that will appear in the chat when the player triggers an encounter event.
+  - **PrefabGUIDOfNPC**: The GUID of the NPC you prefer to use.
+  - **LevelsAbovePlayer**: Specify how many levels you want the NPC to be above the player level. For example, if a player is level 10 and the value is 10, the NPC will spawn at level 20.
+  - **LifeTime**: The duration the player has to kill the NPC encounters in seconds.
+  - **Group** ( Optional ): If you give it a group value, when this NPC touches it it spawns all the NPCS in that group..
+  - Example: `.be npc create "Rifle Man" 1148936156 10 300 "Group One"`
+```ansi
+.be npc remove <NameOfNPC>
 ```
+- Removes an NPC from the encounter randomized pool.
+  -  **NameOfNPC**: The NPC name you want to remove.
+  - Example: `.be npc remove "Rifle Man"`
+```ansi
+.be items add <NameOfNPC> <ItemName> <ItemPrefabID> <Stack>
+```
+- Adds items/rewards to the randomized pool that the player will receive from killing a particular NPC encounter.
+  - **NameOfNPC**: The NPC name to which you want to add items.
+  - **ItemName**: The name of the item/reward appearing in the chat once the player wins the encounter.
+  - **ItemPrefabID**: The GUID for the item you want to add.
+  - **Stack**: The quantity of items the player will gain upon winning the encounter (e.g., x25 Blood Potions).
+  - Example: `.be items add "Rifle Man" "Blood Rose Potion" 429052660 25`
+```ansi
+.be items list (NPCName)
+```
+- Displays the list of items included within a particular NPC.
+  - Example: `.be items list "Rifle Man"`
+```ansi
+.be enable
+```
+- Enables the BloodyEncounter mod.
+  - Example: `.be enable`
+```ansi
+.be disable
+```
+- Disables the BloodyEncounter mod.
+  - Example: `.be disable`
+```ansi
+.be reload
+```
+- Reloads the mod configuration in real-time.
+  - Example: `.be reload`
+```ansi
+.be start
+```
+- Triggers an encounter for a random online player.
+  - Example: `.be start`
+```ansi
+.be me
+```
+- Triggers an encounter for yourself.
+  - Example: `.be me`
+```ansi
+.be player <PlayerName>
+```
+- Triggers an encounter for a specific player.
+  - Example: `.be player Vex`
 
-### Items.cfg
+# Resources
 
-The list of all the items from the game. Individual items can be enabled or disabled. Only enabled items are considered for the random reward. 
+[Complete items list of prefabs/GUID](https://discord.com/channels/978094827830915092/1117273637024714862/1117273642817044571)
 
-*NEW in 0.8.0:* You can now specify the quantities for each item. Unobtainable items are disabled by default.
+# Credits
 
-### NPCs.cfg
+This mod was originally developed by [@adainrivers](https://github.com/adainrivers/randomencounters) and was ported/updated to be compatible with the Gloomrot update.
 
-The list of all the NPCs from the game. Individual NPCs can be enabled or disabled. Only enabled NPCs are considered for the random encounter.
+[V Rising Mod Community](https://discord.gg/vrisingmods) is the premier community of mods for V Rising.
 
+[@Deca](https://github.com/decaprime), thank you for the exceptional frameworks [VampireCommandFramework](https://github.com/decaprime/VampireCommandFramework) and [BloodStone](https://github.com/decaprime/Bloodstone), based on [WetStone](https://github.com/molenzwiebel/Wetstone) by [@Molenzwiebel](https://github.com/molenzwiebel).
+
+[@Backxtar](https://github.com/Backxtar), owner & founder of [Bloody Mary](https://discord.gg/sE2hqbxUU4) server, and [@LecherousCthulhu](https://github.com/HasturDev) & [@Willis](https://github.com/emelonakos) for being amazing community modders and part of the *BloodyTeam*.
+
+**Special thanks to the testers and supporters of the project:**
+
+- @Vex, owner & founder of [Vexor RPG](https://discord.gg/JpVsKVvKNR) server, a tester and great supporter who provided his server as a test platform and took care of all the graphics and documentation.
